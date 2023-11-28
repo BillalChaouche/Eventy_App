@@ -25,7 +25,7 @@ class MainApp extends StatelessWidget {
           EventProvider(), // Create an instance of EventProvider
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: '/Notifications',
+        initialRoute: '/',
         routes: {
           '/': (context) => Home(), // Wrap Home widget with EventProvider
           '/filter': (context) => Filter(),
