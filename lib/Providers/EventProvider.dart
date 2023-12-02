@@ -1,4 +1,4 @@
-import 'package:eventy/entities/EventEntity.dart';
+import 'package:eventy/models/EventEntity.dart';
 import 'package:flutter/material.dart';
 
 class EventProvider extends ChangeNotifier {

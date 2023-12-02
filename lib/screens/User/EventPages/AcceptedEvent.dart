@@ -1,7 +1,7 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:eventy/Providers/EventProvider.dart';
-import 'package:eventy/entities/EventEntity.dart';
+import 'package:eventy/models/EventEntity.dart';
 import 'package:eventy/widgets/blurButton.dart';
 import 'package:eventy/widgets/floatingButtonWidget.dart';
 import 'package:eventy/widgets/profileWidget.dart';

@@ -1,13 +1,16 @@
+import 'package:eventy/RootPage.dart';
 import 'package:eventy/Providers/EventProvider.dart';
-import 'package:eventy/screens/AcceptedEvent.dart';
-import 'package:eventy/screens/CategoryPage.dart';
-import 'package:eventy/screens/Event.dart';
-import 'package:eventy/screens/Categories.dart';
-import 'package:eventy/screens/Events.dart';
-import 'package:eventy/screens/Filter.dart';
-import 'package:eventy/screens/Home.dart';
-import 'package:eventy/screens/Notifications.dart';
-import 'package:eventy/screens/Profile.dart';
+import 'package:eventy/screens/Organizer/ProfilePages/Profile.dart';
+import 'package:eventy/screens/User/EventPages/AcceptedEvent.dart';
+import 'package:eventy/screens/User/CategoryPages/CategoryPage.dart';
+import 'package:eventy/screens/User/EventPages/Event.dart';
+import 'package:eventy/screens/Common/IntroPages/Splash.dart';
+import 'package:eventy/screens/User/CategoryPages/Categories.dart';
+import 'package:eventy/screens/User/EventPages/Events.dart';
+import 'package:eventy/screens/User/FilterPages/Filter.dart';
+import 'package:eventy/screens/Organizer/HomePages/Home.dart';
+import 'package:eventy/screens/User/NotificationsPages/Notifications.dart';
+import 'package:eventy/screens/User/ProfilePages/Profile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,14 +28,17 @@ class MainApp extends StatelessWidget {
           EventProvider(), // Create an instance of EventProvider
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: '/',
+        initialRoute: '/Splash',
         routes: {
-          '/': (context) => Home(), // Wrap Home widget with EventProvider
+          '/': (context) => RootPage(), // Wrap Home widget with EventProvider
           '/filter': (context) => Filter(),
           '/Events': (context) => Events(),
           '/Profile': (context) => Profile(),
           '/Categories': (context) => Categories(),
           '/Notifications': (context) => Notifications(),
+          '/Splash': (context) => Splash(),
+          '/home': (context) => HomeOrganizer(),
+          '/ProfileOrg': (context) => ProfileOrg()
         },
       ),
     );

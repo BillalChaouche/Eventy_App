@@ -1,4 +1,4 @@
-import 'package:eventy/screens/CategoryPage.dart';
+import 'package:eventy/screens/User/CategoryPages/CategoryPage.dart';
 import 'package:flutter/material.dart';
 import 'package:eventy/widgets/blurButton.dart';
 import 'package:ionicons/ionicons.dart';

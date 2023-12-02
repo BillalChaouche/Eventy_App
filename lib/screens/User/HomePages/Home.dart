@@ -1,8 +1,8 @@
-import 'package:eventy/Components/BottomNavbar.dart';
+import 'package:eventy/RootPage.dart';
 import 'package:eventy/Providers/EventProvider.dart';
 
-import 'package:eventy/screens/Filter.dart';
-import 'package:eventy/screens/Event.dart';
+import 'package:eventy/screens/User/FilterPages/Filter.dart';
+import 'package:eventy/screens/User/EventPages/Event.dart';
 
 import 'package:eventy/widgets/categoryButtonWidget.dart';
 import 'package:eventy/widgets/cirlceIconWidget.dart';
@@ -153,109 +153,107 @@ class _Home extends State<Home> {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // Set this property to false
       home: Scaffold(
-          extendBody: true,
-          appBar: AppBar(
-            toolbarHeight: heightAppBar,
-            elevation: 0,
-            backgroundColor: const Color.fromARGB(0, 255, 255, 255),
-            title: Center(
-              child: AnimatedOpacity(
-                opacity: showText
-                    ? 1.0
-                    : 0.0, // Change opacity based on showText value
-                duration: const Duration(milliseconds: 300),
-                child: const Text(
-                    "Events", // Dynamic text based on scroll position
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Color.fromARGB(255, 102, 37, 73))),
-              ),
+        extendBody: true,
+        appBar: AppBar(
+          toolbarHeight: heightAppBar,
+          elevation: 0,
+          backgroundColor: const Color.fromARGB(0, 255, 255, 255),
+          title: Center(
+            child: AnimatedOpacity(
+              opacity: showText
+                  ? 1.0
+                  : 0.0, // Change opacity based on showText value
+              duration: const Duration(milliseconds: 300),
+              child: const Text(
+                  "Events", // Dynamic text based on scroll position
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Color.fromARGB(255, 102, 37, 73))),
             ),
           ),
-          // here all screen scroll
-          body: SingleChildScrollView(
-            controller: _scrollController,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                18,
-                20,
-                18,
-                0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        ),
+        // here all screen scroll
+        body: SingleChildScrollView(
+          controller: _scrollController,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              18,
+              20,
+              18,
+              0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    profileWidget(47, 47, 'assets/images/profile.jpg', true,
+                        NavigateToProfilePage),
+                    circleIconWidget(47, 47, Ionicons.notifications_outline,
+                        () {
+                      Navigator.pushNamed(context, '/Notifications');
+                    }),
+                  ],
+                ),
+                const SizedBox(height: 30),
+
+                searchBarWidget(
+                    hintText: "Search for events",
+                    filter: true,
+                    buttonFunctionality: showFilter),
+                const SizedBox(height: 25),
+                leftTitleWidget('Categories', 18),
+                // I want this elements which are categoires when they reach the top the main scrool stop
+                Container(
+                  height: 80, // Set the desired height
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
                     children: [
-                      profileWidget(47, 47, 'assets/images/profile.jpg', true,
-                          NavigateToProfilePage),
-                      circleIconWidget(47, 47, Ionicons.notifications_outline,
-                          () {
-                        Navigator.pushNamed(context, '/Notifications');
-                      }),
+                      Row(
+                        children: [
+                          for (var entry in categoryState.entries)
+                            categoryButtonWidget(
+                              icon: entry.value['icon'],
+                              text: entry.key,
+                              isSelected: entry.value['selected'],
+                              onCategorySelected: (isSelected) {
+                                setState(() {
+                                  categoryState[entry.key]!['selected'] =
+                                      isSelected;
+                                  _resetOtherCategories(entry.key);
+                                });
+                              },
+                            ),
+                        ],
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 30),
+                ),
+                const SizedBox(height: 8),
+                leftTitleWidget('Events', 18),
+                const SizedBox(height: 6),
 
-                  searchBarWidget(
-                      hintText: "Search for events",
-                      buttonFunctionality: showFilter),
-                  const SizedBox(height: 25),
-                  leftTitleWidget('Categories', 18),
-                  // I want this elements which are categoires when they reach the top the main scrool stop
-                  Container(
-                    height: 80, // Set the desired height
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        Row(
-                          children: [
-                            for (var entry in categoryState.entries)
-                              categoryButtonWidget(
-                                icon: entry.value['icon'],
-                                text: entry.key,
-                                isSelected: entry.value['selected'],
-                                onCategorySelected: (isSelected) {
-                                  setState(() {
-                                    categoryState[entry.key]!['selected'] =
-                                        isSelected;
-                                    _resetOtherCategories(entry.key);
-                                  });
-                                },
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  leftTitleWidget('Events', 18),
-                  const SizedBox(height: 6),
-
-                  // and the scroll become only here on events
-                  ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: events.length,
-                      itemBuilder: (context, index) {
-                        var event =
-                            Provider.of<EventProvider>(context).events[index];
-                        return eventWidget(
+                // and the scroll become only here on events
+                ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: events.length,
+                    itemBuilder: (context, index) {
+                      var event =
+                          Provider.of<EventProvider>(context).events[index];
+                      return eventWidget(
                           // other parameters...
                           event: event,
                           buttonFunctionality: showEvent,
-                        );
-                      }),
-                ],
-              ),
+                          save: true);
+                    }),
+              ],
             ),
           ),
-          bottomNavigationBar: BottomNavbar(
-            currentIndex: 1,
-            navigatorContext: context,
-          )),
+        ),
+      ),
     );
   }
 

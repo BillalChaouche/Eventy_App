@@ -1,5 +1,5 @@
 import 'package:eventy/Providers/EventProvider.dart';
-import 'package:eventy/entities/EventEntity.dart';
+import 'package:eventy/models/EventEntity.dart';
 import 'package:eventy/widgets/blurButton.dart';
 import 'package:eventy/widgets/categoryType.dart';
 import 'package:eventy/widgets/eventDetail.dart';

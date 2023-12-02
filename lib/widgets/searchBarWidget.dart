@@ -5,6 +5,7 @@ typedef ButtonFunctionality = void Function();
 
 Widget searchBarWidget(
     {required String hintText,
+    required bool filter,
     required ButtonFunctionality buttonFunctionality}) {
   return Container(
     margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -44,15 +45,17 @@ Widget searchBarWidget(
         ),
         const SizedBox(
             width: 10), // Add space between input field and filter icon
-        GestureDetector(
-          onTap: () {
-            buttonFunctionality();
-          },
-          child: const Icon(
-            Ionicons.filter_outline,
-            color: Color.fromARGB(255, 102, 37, 73),
-          ),
-        ),
+        (filter)
+            ? GestureDetector(
+                onTap: () {
+                  buttonFunctionality();
+                },
+                child: const Icon(
+                  Ionicons.filter_outline,
+                  color: Color.fromARGB(255, 102, 37, 73),
+                ),
+              )
+            : Container()
       ],
     ),
   );

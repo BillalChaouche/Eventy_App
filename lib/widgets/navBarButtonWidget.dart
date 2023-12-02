@@ -1,16 +1,17 @@
+import 'package:eventy/widgets/blurButton.dart';
 import 'package:flutter/material.dart';
 
-Widget navBarButtonWiget(
-    {required String name,
-    required IconData icon,
-    required int id,
-    required int selected,
-    required String routeName,
-    required BuildContext context}) {
+typedef FunctionallityButton = void Function(int id);
+Widget navBarButtonWiget({
+  required String name,
+  required IconData icon,
+  required int id,
+  required int selected,
+  required FunctionallityButton functionallityButton,
+}) {
   return GestureDetector(
     onTap: () {
-      Navigator.pop(context);
-      Navigator.pushNamed(context, routeName);
+      functionallityButton(id);
     },
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,

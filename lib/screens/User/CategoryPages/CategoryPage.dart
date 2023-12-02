@@ -1,8 +1,8 @@
 import 'package:eventy/Components/PageAppBar.dart';
 import 'package:eventy/Providers/EventProvider.dart';
 
-import 'package:eventy/screens/Filter.dart';
-import 'package:eventy/screens/Event.dart';
+import 'package:eventy/screens/User/FilterPages/Filter.dart';
+import 'package:eventy/screens/User/EventPages/Event.dart';
 
 import 'package:eventy/widgets/eventWidget.dart';
 
@@ -114,6 +114,7 @@ class _CategoryPage extends State<CategoryPage> {
 
                 searchBarWidget(
                     hintText: "Search for events",
+                    filter: true,
                     buttonFunctionality: showFilter),
 
                 const SizedBox(height: 30),
@@ -128,10 +129,10 @@ class _CategoryPage extends State<CategoryPage> {
                         Provider.of<EventProvider>(context).events[index];
                     if (event.categories.contains(widget.categoryName)) {
                       return eventWidget(
-                        // other parameters...
-                        event: event,
-                        buttonFunctionality: showEvent,
-                      );
+                          // other parameters...
+                          event: event,
+                          buttonFunctionality: showEvent,
+                          save: true);
                     }
                     // If the condition is not met, return an empty Container or SizedBox
                     // You can replace Container/SizedBox with any other widget that fits your layout

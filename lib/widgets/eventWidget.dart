@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:eventy/Providers/EventProvider.dart';
-import 'package:eventy/entities/EventEntity.dart';
+import 'package:eventy/models/EventEntity.dart';
 import 'package:eventy/widgets/blurButton.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -12,6 +12,7 @@ typedef ButtonFunctionality = void Function(int id);
 Widget eventWidget({
   required EventEntity event,
   required ButtonFunctionality buttonFunctionality,
+  required bool save,
 }) {
   return Consumer<EventProvider>(
     builder: (context, eventProvider, _) {
@@ -72,18 +73,21 @@ Widget eventWidget({
                           ),
                         ),
                       ),
-                      blurButton(
-                        icon: event.saved
-                            ? Ionicons.bookmark
-                            : Ionicons.bookmark_outline,
-                        width: 30,
-                        height: 30,
-                        iconSize: 14,
-                        color: Colors.white,
-                        functionallityButton: () {
-                          eventProvider.toggleEventSavedState(event.id - 1);
-                        },
-                      ),
+                      (save)
+                          ? blurButton(
+                              icon: event.saved
+                                  ? Ionicons.bookmark
+                                  : Ionicons.bookmark_outline,
+                              width: 30,
+                              height: 30,
+                              iconSize: 14,
+                              color: Colors.white,
+                              functionallityButton: () {
+                                eventProvider
+                                    .toggleEventSavedState(event.id - 1);
+                              },
+                            )
+                          : Container()
                     ],
                   ),
                 ),
