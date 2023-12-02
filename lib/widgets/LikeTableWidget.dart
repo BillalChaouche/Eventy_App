@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class LikeTableWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Container(
       padding: EdgeInsets.all(16.0),
       child: Column(
@@ -10,12 +12,16 @@ class LikeTableWidget extends StatelessWidget {
           // Column for table headers
           Row(
             children: [
-              // Set the same flex values for the header
-              Expanded(child: TableHeaderCell('ID', flex: 1)),
-              Expanded(child: TableHeaderCell('USER', flex: 1)),
-              Expanded(child: TableHeaderCell('DATE', flex: 1)),
-              Expanded(child: TableHeaderCell('PRESENT', flex: 1)),
-              Expanded(child: TableHeaderCell('STATUS', flex: 1)),
+              TableHeaderCell('ID',
+                  widthPercentage: 0.1, screenWidth: screenWidth),
+              TableHeaderCell('USER',
+                  widthPercentage: 0.28, screenWidth: screenWidth),
+              TableHeaderCell('DATE',
+                  widthPercentage: 0.16, screenWidth: screenWidth),
+              TableHeaderCell('PRESENT',
+                  widthPercentage: 0.18, screenWidth: screenWidth),
+              TableHeaderCell('STATUS',
+                  widthPercentage: 0.18, screenWidth: screenWidth),
             ],
           ),
           // Divider line
@@ -27,13 +33,24 @@ class LikeTableWidget extends StatelessWidget {
           // Column for table rows
           Column(
             children: [
-              // Row representing a table row
               TableRowRow(
                 id: 2,
                 userName: 'Jhon wick',
                 date: '12-13-22',
                 presentStatus: 'Waiting',
                 status: 'Accepted',
+                screenWidth: screenWidth,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              TableRowRow(
+                id: 2,
+                userName: 'Jhon sick',
+                date: '12-13-2022',
+                presentStatus: 'Waiting',
+                status: 'Accepted',
+                screenWidth: screenWidth,
               ),
               const SizedBox(
                 height: 10,
@@ -44,17 +61,8 @@ class LikeTableWidget extends StatelessWidget {
                 date: '12-13-22',
                 presentStatus: 'Waiting',
                 status: 'Accepted',
+                screenWidth: screenWidth,
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              TableRowRow(
-                id: 2,
-                userName: 'Jhon wick',
-                date: '12-13-22',
-                presentStatus: 'Waiting',
-                status: 'Accepted',
-              )
             ],
           ),
         ],
@@ -65,20 +73,24 @@ class LikeTableWidget extends StatelessWidget {
 
 class TableHeaderCell extends StatelessWidget {
   final String title;
-  final int flex;
+  final double widthPercentage;
+  final double screenWidth;
 
-  TableHeaderCell(this.title, {required this.flex});
+  TableHeaderCell(this.title,
+      {required this.widthPercentage, required this.screenWidth});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex, // Set the provided flex value
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
+    return Container(
+      width: screenWidth * widthPercentage,
+      child: Center(
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
       ),
     );
@@ -91,6 +103,7 @@ class TableRowRow extends StatelessWidget {
   final String date;
   final String presentStatus;
   final String status;
+  final double screenWidth;
 
   TableRowRow({
     required this.id,
@@ -98,31 +111,27 @@ class TableRowRow extends StatelessWidget {
     required this.date,
     required this.presentStatus,
     required this.status,
+    required this.screenWidth,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Adjusted flex for ID column
-        Expanded(child: TableCellCell(id.toString(), flex: 1)),
-        Expanded(
-          // Adjusted flex for USER column
-          flex: 1,
-          child: Row(
+        TableCellCell(id.toString(),
+            widthPercentage: 0.1, screenWidth: screenWidth),
+        TableCellCell(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Container for user with a row of round picture
-              Container(
-                child: CircleAvatar(
-                  radius: 16.0,
-                  backgroundImage: AssetImage('assets/images/profile.jpg'),
-                ),
+              CircleAvatar(
+                radius: 16.0,
+                backgroundImage: AssetImage('assets/images/profile.jpg'),
               ),
               const SizedBox(
                 width: 4,
               ),
-              // Container for user name, allowing it to wrap to the next line
               Expanded(
                 child: Container(
                   child: Text(
@@ -134,37 +143,34 @@ class TableRowRow extends StatelessWidget {
               ),
             ],
           ),
+          widthPercentage: 0.28,
+          screenWidth: screenWidth,
         ),
-        // Adjusted flex for DATE column
-        Expanded(child: TableCellCell(date, flex: 1)),
-        // Adjusted flex for PRESENT column
-        Expanded(
-          child: TableCellCell(
-            Container(
-              padding: EdgeInsets.all(1.0),
-              decoration: BoxDecoration(
-                color: Colors.pink,
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Center(
-                child: Text(
-                  presentStatus,
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
+        TableCellCell(date, widthPercentage: 0.17, screenWidth: screenWidth),
+        TableCellCell(
+          Container(
+            padding: EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              color: Colors.pink,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Center(
+              child: Text(
+                presentStatus,
+                style: TextStyle(color: Colors.white, fontSize: 11),
               ),
             ),
-            flex: 1,
           ),
+          widthPercentage: 0.18,
+          screenWidth: screenWidth,
         ),
-        // Adjusted flex for STATUS column
-        Expanded(
-          child: TableCellCell(
-            Text(
-              status,
-              style: TextStyle(color: Colors.green, fontSize: 12),
-            ),
-            flex: 1,
+        TableCellCell(
+          Text(
+            status,
+            style: TextStyle(color: Colors.green, fontSize: 11),
           ),
+          widthPercentage: 0.18,
+          screenWidth: screenWidth,
         ),
       ],
     );
@@ -173,23 +179,23 @@ class TableRowRow extends StatelessWidget {
 
 class TableCellCell extends StatelessWidget {
   final dynamic content;
-  final int flex; // Added flex property
+  final double widthPercentage;
+  final double screenWidth;
 
-  TableCellCell(this.content, {this.flex = 1}); // Default flex value to 1
+  TableCellCell(this.content,
+      {required this.widthPercentage, required this.screenWidth});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex, // Use the provided flex value
-      child: Container(
-        padding: EdgeInsets.all(8.0),
-        child: content is Widget
-            ? content
-            : Text(
-                content.toString(),
-                style: TextStyle(fontSize: 12),
-              ),
-      ),
+    return Container(
+      width: screenWidth * widthPercentage,
+      padding: EdgeInsets.all(8.0),
+      child: content is Widget
+          ? content
+          : Text(
+              content.toString(),
+              style: TextStyle(fontSize: 11),
+            ),
     );
   }
 }
