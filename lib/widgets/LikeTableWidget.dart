@@ -146,7 +146,7 @@ class TableRowRow extends StatelessWidget {
           widthPercentage: 0.28,
           screenWidth: screenWidth,
         ),
-        TableCellCell(date, widthPercentage: 0.16, screenWidth: screenWidth),
+        TableCellCell(date, widthPercentage: 0.17, screenWidth: screenWidth),
         TableCellCell(
           Container(
             padding: EdgeInsets.all(4.0),
@@ -194,7 +194,7 @@ class TableCellCell extends StatelessWidget {
           ? content
           : Text(
               content.toString(),
-              style: TextStyle(fontSize: 12),
+              style: TextStyle(fontSize: 11),
             ),
     );
   }
