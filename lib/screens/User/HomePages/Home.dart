@@ -1,5 +1,10 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:eventy/RootPage.dart';
 import 'package:eventy/Providers/EventProvider.dart';
+import 'package:eventy/databases/DBcategory.dart';
+import 'package:eventy/screens/User/CategoryPages/Categories.dart';
 
 import 'package:eventy/screens/User/FilterPages/Filter.dart';
 import 'package:eventy/screens/User/EventPages/Event.dart';
@@ -15,15 +20,25 @@ import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
+  static Map<String, IconData> _iconDataMapping = {
+    'home': Icons.home,
+    'musical_notes': Ionicons.musical_note,
+    'football': Ionicons.football,
+    'aperture': Ionicons.aperture,
+    'school': Ionicons.school,
+    'default': Ionicons.star
+
+    // Add more mappings as needed
+  };
   @override
   _Home createState() => _Home();
 }
 
 class _Home extends State<Home> {
   final ScrollController _scrollController = ScrollController();
+  late Future<List<Map<String, dynamic>>> _fetchCategories;
   bool showText = false; // Default text for the AppBar
   double heightAppBar = 0;
-
   // categories information simple
   Map<String, Map<String, dynamic>> categoryState = {
     'My feed': {'selected': true, 'icon': Icons.home},
@@ -115,12 +130,15 @@ class _Home extends State<Home> {
   // location and time
   String location = "Choose Wilaya";
   String time = "Any Time";
+  bool _isLoading = true;
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     showText = false;
     heightAppBar = 0;
+    _fetchCategories = fetchingCategories();
+    ;
   }
 
   void _onScroll() {
@@ -148,8 +166,34 @@ class _Home extends State<Home> {
     super.dispose();
   }
 
+  Future<List<Map<String, dynamic>>> fetchingCategories() async {
+    await Future.delayed(Duration(seconds: 4));
+
+    await DBCategory.service_sync_categories();
+    List<Map<String, dynamic>> categories = await DBCategory.getAllCategories();
+
+    // Create a new list with modified 'selected' property
+    List<Map<String, dynamic>> modifiedCategories = [];
+    for (int i = 0; i < categories.length; i++) {
+      Map<String, dynamic> category = Map.from(categories[i]);
+      if (i == 0) {
+        category['selected'] = true;
+      } else {
+        category['selected'] = false;
+      }
+      modifiedCategories.add(category);
+    }
+
+    return modifiedCategories;
+  }
+
   @override
   Widget build(BuildContext context) {
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _isLoading = !_isLoading;
+      });
+    });
     return MaterialApp(
       debugShowCheckedModeBanner: false, // Set this property to false
       home: Scaffold(
@@ -206,30 +250,84 @@ class _Home extends State<Home> {
                 const SizedBox(height: 25),
                 leftTitleWidget('Categories', 18),
                 // I want this elements which are categoires when they reach the top the main scrool stop
-                Container(
-                  height: 80, // Set the desired height
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      Row(
-                        children: [
-                          for (var entry in categoryState.entries)
-                            categoryButtonWidget(
-                              icon: entry.value['icon'],
-                              text: entry.key,
-                              isSelected: entry.value['selected'],
-                              onCategorySelected: (isSelected) {
-                                setState(() {
-                                  categoryState[entry.key]!['selected'] =
-                                      isSelected;
-                                  _resetOtherCategories(entry.key);
-                                });
-                              },
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
+                FutureBuilder<List<Map<String, dynamic>>>(
+                  future: _fetchCategories,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Container(
+                        height: 80,
+                        width: double.infinity,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          physics: NeverScrollableScrollPhysics(),
+                          children: [
+                            Row(children: [
+                              categroyShadow(),
+                              SizedBox(
+                                width: 12,
+                              ),
+                              categroyShadow(),
+                              SizedBox(
+                                width: 12,
+                              ),
+                              categroyShadow(),
+                              SizedBox(
+                                width: 12,
+                              ),
+                              categroyShadow(),
+                            ]),
+                          ],
+                        ),
+                      );
+                      // Show a loading indicator while fetching data
+                    } else if (snapshot.hasError) {
+                      return Text(
+                          'Error fetching data'); // Show an error message if data fetch fails
+                    } else {
+                      List<Map<String, dynamic>> categories =
+                          snapshot.data ?? [];
+                      // Resetting function
+                      void _resetOtherCategories(String selectedCategory) {
+                        setState(() {
+                          for (var category in categories) {
+                            final categoryName = category['name'];
+                            if (categoryName != selectedCategory) {
+                              category['selected'] = false;
+                            } else {
+                              category['selected'] = true;
+                            }
+                          }
+                        });
+                      }
+
+                      return Container(
+                        height: 80,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            Row(children: [
+                              for (var category in categories)
+                                categoryButtonWidget(
+                                  icon: Home._iconDataMapping[
+                                          category['icon'] ?? 'default'] ??
+                                      Icons
+                                          .error, // Accessing the icon from the mapping
+                                  text: category['name'],
+                                  isSelected: category['selected'],
+                                  onCategorySelected: (isSelected) {
+                                    // Handle category selection here
+                                    setState(() {
+                                      category['selected'] = isSelected;
+                                      _resetOtherCategories(category['name']);
+                                    });
+                                  },
+                                ),
+                            ]),
+                          ],
+                        ),
+                      );
+                    }
+                  },
                 ),
                 const SizedBox(height: 8),
                 leftTitleWidget('Events', 18),
@@ -255,14 +353,6 @@ class _Home extends State<Home> {
         ),
       ),
     );
-  }
-
-  void _resetOtherCategories(String selectedCategory) {
-    for (var key in categoryState.keys) {
-      if (key != selectedCategory) {
-        categoryState[key]!['selected'] = false;
-      }
-    }
   }
 
   void showFilter() {
@@ -304,5 +394,29 @@ class _Home extends State<Home> {
 
   void NavigateToProfilePage() {
     Navigator.pushNamed(context, '/Profile');
+  }
+
+  Widget categroyShadow() {
+    return AnimatedContainer(
+      height: 50,
+      width: 90,
+      duration: Duration(milliseconds: 500),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(40.0),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: _isLoading
+              ? [
+                  const Color.fromARGB(255, 221, 221, 221),
+                  const Color.fromARGB(255, 244, 244, 244)
+                ]
+              : [
+                  const Color.fromARGB(255, 244, 244, 244),
+                  const Color.fromARGB(255, 221, 221, 221)
+                ],
+        ),
+      ),
+    );
   }
 }
