@@ -1,13 +1,12 @@
-import 'package:eventy/RootPage.dart';
 import 'package:eventy/Components/PageAppBar.dart';
 import 'package:eventy/Providers/EventProvider.dart';
-import 'package:eventy/models/EventEntity.dart';
+
 import 'package:eventy/screens/User/EventPages/AcceptedEvent.dart';
 import 'package:eventy/screens/User/EventPages/Event.dart';
 import 'package:eventy/widgets/eventCard.dart';
-import 'package:eventy/widgets/eventWidget.dart';
+
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
+
 import 'package:provider/provider.dart';
 
 class Events extends StatefulWidget {

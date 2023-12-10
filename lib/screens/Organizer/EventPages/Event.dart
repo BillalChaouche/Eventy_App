@@ -47,85 +47,87 @@ class _EventState extends State<Event> {
         HomeOrganizer.events.firstWhere((event) => event.id == widget.eventId);
 
     return Scaffold(
-      body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(12, 40, 12, 0),
-              height: 300,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                // Optional: Add border radius
-                image: DecorationImage(
-                  image:
-                      AssetImage(event.imgPath), // Replace with your image path
-                  fit: BoxFit.cover,
+      body: Stack(children: <Widget>[
+        Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(12, 40, 12, 0),
+                height: 300,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  // Optional: Add border radius
+                  image: DecorationImage(
+                    image: AssetImage(
+                        event.imgPath), // Replace with your image path
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            blurButton(
+                                icon: Ionicons.chevron_back_outline,
+                                width: 40,
+                                height: 40,
+                                iconSize: 18,
+                                color: Colors.white,
+                                functionallityButton: () =>
+                                    {Navigator.pop(context)})
+                          ],
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(width: 10),
+                            blurButton(
+                                icon: Ionicons.share_social_outline,
+                                width: 40,
+                                height: 40,
+                                iconSize: 17,
+                                color: Colors.white,
+                                functionallityButton: () => {})
+                          ],
+                        )
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Expanded(
+                  child: PageView(
+                physics: NeverScrollableScrollPhysics(),
+                controller: _pageController,
+                onPageChanged: (int page) {
+                  setState(() {
+                    _currentPage = page;
+                  });
+                },
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          blurButton(
-                              icon: Ionicons.chevron_back_outline,
-                              width: 40,
-                              height: 40,
-                              iconSize: 18,
-                              color: Colors.white,
-                              functionallityButton: () =>
-                                  {Navigator.pop(context)})
-                        ],
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(width: 10),
-                          blurButton(
-                              icon: Ionicons.share_social_outline,
-                              width: 40,
-                              height: 40,
-                              iconSize: 17,
-                              color: Colors.white,
-                              functionallityButton: () => {})
-                        ],
-                      )
-                    ],
-                  )
+                  overviewPage(event),
+                  managingPage(),
                 ],
-              ),
-            ),
-            Positioned(
-              top: 280.0,
-              left: (MediaQuery.of(context).size.width / 2) -
-                  (50.0), // Adjust 50.0 based on the width of your widget
-              child:
-                  topPageViewButtons(), // Replace YourWidget with your actual widget
-            ),
-            Expanded(
-                child: PageView(
-              physics: NeverScrollableScrollPhysics(),
-              controller: _pageController,
-              onPageChanged: (int page) {
-                setState(() {
-                  _currentPage = page;
-                });
-              },
-              children: [
-                overviewPage(event),
-                managingPage(),
-              ],
-            )),
-          ]),
+              )),
+            ]),
+        Positioned(
+          bottom: 400.0,
+          left: (MediaQuery.of(context).size.width / 5),
+          // Adjust 50.0 based on the width of your widget
+          child:
+              topPageViewButtons(), // Replace YourWidget with your actual widget
+        ),
+      ]),
       bottomNavigationBar:
           isManagingSelected ? bottomScanButton() : bottomEditButton(event.id),
     );
@@ -197,7 +199,7 @@ class _EventState extends State<Event> {
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(
             18,
-            20,
+            40,
             18,
             0,
           ),
@@ -248,95 +250,102 @@ class _EventState extends State<Event> {
   Widget topPageViewButtons() {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFFECACAD),
-        borderRadius: BorderRadius.all(Radius.circular(10)),
+        color: Color.fromARGB(220, 255, 255, 255),
+        borderRadius: BorderRadius.all(Radius.circular(30)),
       ),
       clipBehavior: Clip.hardEdge,
       width: MediaQuery.of(context).size.width * 0.6,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width * 0.3,
-            height: 50,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10.0),
-                bottomLeft: Radius.circular(10.0),
-              ),
-              color:
-                  isManagingSelected ? Colors.transparent : Color(0xFF662549),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                splashColor: Color(0xFFCE99A3),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 9.0, sigmaY: 9.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width * 0.3,
+              height: 50,
+              decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10.0),
-                  bottomLeft: Radius.circular(10.0),
+                  topLeft: Radius.circular(30.0),
+                  bottomLeft: Radius.circular(30.0),
                 ),
-                onTap: () {
-                  setState(() {
-                    isManagingSelected = false;
-                    _pageController.animateToPage(0,
-                        duration: Duration(milliseconds: 500),
-                        curve: Curves.ease);
-                  });
-                },
-                child: Center(
-                  child: Text(
-                    "Overview",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color:
-                          isManagingSelected ? Color(0xFF662549) : Colors.white,
+                color:
+                    isManagingSelected ? Colors.transparent : Color(0xFF662549),
+              ),
+              child: Center(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    splashColor: Color(0xFFCE99A3),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10.0),
+                      bottomLeft: Radius.circular(10.0),
+                    ),
+                    onTap: () {
+                      setState(() {
+                        isManagingSelected = false;
+                        _pageController.animateToPage(0,
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.ease);
+                      });
+                    },
+                    child: Center(
+                      child: Text(
+                        "Overview",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isManagingSelected
+                              ? Color(0xFF662549)
+                              : Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.3,
-            height: 50,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(10.0),
-                bottomRight: Radius.circular(10.0),
-              ),
-              color:
-                  isManagingSelected ? Color(0xFF662549) : Colors.transparent,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                splashColor: Color(0xFFCE99A3),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.3,
+              height: 50,
+              decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10.0),
-                  bottomLeft: Radius.circular(10.0),
+                  topRight: Radius.circular(30.0),
+                  bottomRight: Radius.circular(30.0),
                 ),
-                onTap: () {
-                  setState(() {
-                    isManagingSelected = true;
-                    _pageController.animateToPage(1,
-                        duration: Duration(milliseconds: 500),
-                        curve: Curves.ease);
-                  });
-                },
-                child: Center(
-                  child: Text(
-                    "Managing",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color:
-                          isManagingSelected ? Colors.white : Color(0xFF662549),
+                color:
+                    isManagingSelected ? Color(0xFF662549) : Colors.transparent,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  splashColor: Color(0xFFCE99A3),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                    bottomLeft: Radius.circular(30.0),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      isManagingSelected = true;
+                      _pageController.animateToPage(1,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.ease);
+                    });
+                  },
+                  child: Center(
+                    child: Text(
+                      "Managing",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isManagingSelected
+                            ? Colors.white
+                            : Color(0xFF662549),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

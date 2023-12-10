@@ -6,7 +6,7 @@ class LikeTableWidget extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: EdgeInsets.fromLTRB(16.0, 40, 16, 16),
       child: Column(
         children: [
           // Column for table headers

@@ -8,21 +8,26 @@ environment:
 
 dependencies:
   animate_do: ^3.1.2
+  cron: ^0.5.1
   cupertino_icons: ^1.0.6
   dotted_border: ^2.1.0
   dotted_line: ^3.2.2
   file_picker: ^6.1.1
+  firebase_core: ^2.24.0
   floating_navbar: ^2.0.2
   flutter:
     sdk: flutter
   flutter_floating_bottom_bar: ^1.2.0
   flutter_typeahead: ^4.8.0
   get: ^4.6.6
+  http: ^1.1.0
   intl: ^0.18.1
   ionicons: ^0.2.2
   pretty_qr_code: ^3.0.0
   provider: ^6.1.1
+  pull_to_refresh: ^2.0.0
   qr_flutter: ^4.1.0
+  sqflite: ^2.3.0
 
 dev_dependencies:
   flutter_test:
