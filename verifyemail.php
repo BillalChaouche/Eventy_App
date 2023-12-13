@@ -23,13 +23,13 @@ $userEmail = $vars['userEmail'];
 $code = $vars['code'];
 
 
-$query = "SELECT * FROM USERS WHERE email = ? AND email_verif_code = ?";
+$query = "SELECT * FROM users WHERE email = ? AND verification_num = ?";
 $result = $db->query($query, $userEmail, $code)->fetchArray();
 
 if (!empty($result)) {
     // Valid email verification code
     // Update the is_verified column to mark the user as verified
-    $updateQuery = "UPDATE USERS SET is_verified = 1 WHERE email = ?";
+    $updateQuery = "UPDATE users SET verified = 1 WHERE email = ?";
     $db->query($updateQuery, $userEmail);
 
     echo json_encode(array("success" => "Email verified successfully"));

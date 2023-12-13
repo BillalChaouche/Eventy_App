@@ -38,7 +38,7 @@ function sendVerificationCode($email, $verificationCode) {
 }
 
 function generateVerificationCode() {
-    return mt_rand(100000, 999999); // Generate a random 6-digit code
+    return mt_rand(1000, 9999); // Generate a random 4-digit code
 }
 
 
