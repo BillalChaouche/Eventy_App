@@ -34,14 +34,14 @@ switch ($vars['action']) {
 
             // Call the insertUser method to add a new user
             if ($dbUsers->insertUser($name, null, null, null, null, null, $email, $hashedPassword, $verificationCode, 0)) {
+                print("user is inserted in remote database") ; 
                 // Send the verification code to the user's email
+                echo json_encode(array("success" => "Sign Up successful from server"));
                 sendVerificationCode($email, $verificationCode);
 
-
-
-                echo json_encode(array("message" => "User registered successfully"));
+                
             } else {
-                echo json_encode(array("error" => "Error during registration"));
+                echo json_encode(array("error" => "not successeful"));
             }
         }
         break;
@@ -59,11 +59,33 @@ switch ($vars['action']) {
 
                 if (password_verify($password, $hashedPassword)) {
                     // Password is correct, user is authenticated
-                    echo json_encode(array("success" => "Login successful from server"));
+                    if ($user['verified']===1)
+                    {
+                        echo json_encode(array("success" => "Login successful from server"));
+                    }
+                    else{
+                        echo json_encode(array("error" => "user not verified yet"));
+                    }
+                
                 } else {
                     // Password is incorrect
                     echo json_encode(array("error" => "Invalid password"));
                 }
+            } else {
+                // User not found
+                echo json_encode(array("error" => "User not found"));
+            }
+        }
+        break;
+        case "get_user_by_email": {
+            $email = $vars['email'];
+
+            // Fetch user record from the database based on the email
+            $user = $dbUsers->getUserByEmail($email);
+
+            if ($user !== null) {
+              echo json_encode(array("user" => $user));
+
             } else {
                 // User not found
                 echo json_encode(array("error" => "User not found"));
