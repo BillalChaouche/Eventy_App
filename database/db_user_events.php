@@ -1,6 +1,6 @@
 <?php
 
-include("init.php"); 
+include(__DIR__."/../init.php");
 
 function insertUserEvent($data)
 {
@@ -68,6 +68,44 @@ function updateUserEvent($user_id, $event_id, $data)
     }
 }
 
+
+function updateUserEventState($user_id, $event_id, $data)
+{
+    global $db;
+
+    // Sanitize input (consider using prepared statements)
+    $updateColumns = [];
+
+    $allowedColumns = ['booked', 'saved', 'accepted', 'code', 'date', 'scanned'];
+
+    foreach ($allowedColumns as $column) {
+        if (isset($data[$column])) {
+            $updateColumns[] = "$column = '{$data[$column]}'";
+        }
+    }
+
+    // Construct the SET clause
+    $setClause = implode(', ', $updateColumns);
+
+    // Update the user event in the users_events table
+    $sql = "UPDATE users_events 
+            SET $setClause
+            WHERE user_id = '$user_id' AND event_id = '$event_id'";
+
+    // Execute the query
+    $db->query($sql);
+
+    // Check for errors
+    if ($db->affectedRows() > 0) {
+        // Successful update
+        return ['success' => 'User event updated successfully'];
+    } else {
+        // Error during update
+        return ['error' => 'Failed to update user event'];
+    }
+}
+
+
 function deleteUserEvent($user_id, $event_id)
 {
     global $db;
@@ -85,6 +123,25 @@ function deleteUserEvent($user_id, $event_id)
         return ['error' => 'Failed to delete user event'];
     }
 }
+
+
+function selectUserEvents($user_id)
+{
+    global $db;
+
+    // Select events for a specific user from the events table
+    $sql = "SELECT events.*
+            FROM events
+            INNER JOIN users_events ON events.id = users_events.event_id
+            WHERE users_events.user_id = '$user_id'";
+
+    // Execute the query and fetch results
+    $results = $db->query($sql)->fetchAll();
+
+    return $results;
+}
+
+
 
 
 
