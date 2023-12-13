@@ -1,23 +1,38 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:sqflite/sqflite.dart';
 import 'DBHelper.dart';
 
 class DBUserOrganizer {
   static const tableName = 'users';
 
-  static const sql_code = '''CREATE TABLE IF NOT EXISTS companies (
+  static const sql_code = '''CREATE TABLE IF NOT EXISTS users (
              id INTEGER PRIMARY KEY AUTOINCREMENT,
-             remote_id INTEGER,
              name TEXT,
-             photo_path TEXT,
               role TEXT,
               birth_date TEXT,
               location TEXT,
               phone_number TEXT,
               email TEXT,
+              verified
               flag INTEGER,
              create_date TEXT
            )
        ''';
+
+  static Future<List<Map<String, dynamic>>> getUser() async {
+    final database = await DBHelper.getDatabase();
+
+    return database.rawQuery('''SELECT 
+            id,
+            name,
+            email,
+            verified
+          FROM ${tableName}
+          order by id DESC
+          ''');
+  }
 
   static Future<List<Map<String, dynamic>>> getAllUsers() async {
     final database = await DBHelper.getDatabase();
@@ -25,15 +40,14 @@ class DBUserOrganizer {
     return database.rawQuery('''SELECT 
             id ,
             name,
-            remote_id
-            photo_path ,
             role ,
             birth_date ,
             location ,
             phone_number ,
             email ,
-            flag ,
-          from ${tableName}
+            verified,
+            flag 
+          FROM ${tableName}
           order by name ASC
           ''');
   }
@@ -47,14 +61,13 @@ class DBUserOrganizer {
     return database.rawQuery('''SELECT 
             id ,
             name,
-            remote_id
-            photo_path ,
             role ,
             birth_date ,
             location ,
             phone_number ,
             email ,
-            flag ,
+            verified,
+            flag 
           from ${tableName}
           Where LOWER(name) like '%${keyword.toLowerCase()}%' 
           order by name ASC
@@ -67,14 +80,12 @@ class DBUserOrganizer {
     return database.rawQuery('''SELECT 
             id ,
             name,
-            remote_id
-            photo_path ,
             role ,
             birth_date ,
             location ,
             phone_number ,
             email ,
-            flag ,
+            flag 
           from ${tableName}
           where flag=1
           ''');
@@ -90,8 +101,7 @@ class DBUserOrganizer {
     return res[0]['cc'] ?? 0;
   }
 
-  static Future<bool> syncUsers(
-      List<Map<String, dynamic>> remote_data) async {
+  static Future<bool> syncUsers(List<Map<String, dynamic>> remote_data) async {
     List local_data = await getAllUsers();
     Map index_remote = {};
     List local_ids = [];
@@ -103,32 +113,80 @@ class DBUserOrganizer {
     for (Map item in remote_data) {
       if (index_remote.containsKey(item['id'])) {
         int local_id = index_remote[item['id']];
-        await updateRecord(local_id, {'name': item['name']});
+        await updateUser(local_id, {'name': item['name']});
         local_ids.remove(local_id);
       } else {
-        await insertRecord({'name': item['name'], 'remote_id': item['id']});
+        await insertUser({'name': item['name'], 'remote_id': item['id']});
       }
     }
-    //Remote Local Categories...
-    //There is a RISK ? in case items pending with old data?
-    for (int local_id in local_ids) await deleteRecord(local_id);
+
+    for (int local_id in local_ids) await deleteUser(local_id);
     return true;
   }
 
-  static Future<bool> updateRecord(int id, Map<String, dynamic> data) async {
+  static Future<bool> updateUser(int id, Map<String, dynamic> data) async {
     final database = await DBHelper.getDatabase();
-    database.update(tableName, data, where: "id=?", whereArgs: [id]);
+
+    // Iterate through the keys in the original data
+    data.forEach((key, value) async {
+      // Create a new Map for the specific column to be updated
+      Map<String, dynamic> columnData = {};
+
+      if (value is num || value is String || value is Uint8List) {
+        // If the value is of a supported type, add it to the column data
+        columnData[key] = value;
+      } else {
+        // If the value is not supported, handle it appropriately
+        // For example, convert complex objects like Maps to JSON strings
+        columnData[key] = jsonEncode(value);
+      }
+
+      // Perform the update for the specific column
+      int rowsAffected =
+          await database.update(tableName, columnData, where: "id=?");
+
+      if (rowsAffected > 0) {
+        print("Column '$key' updated successfully");
+      } else {
+        print("Column '$key' was not updated");
+      }
+    });
+
     return true;
   }
 
-  static Future<int> insertRecord(Map<String, dynamic> data) async {
+  static Future<int> insertUser(Map<String, dynamic> data) async {
     final database = await DBHelper.getDatabase();
-    int id = await database.insert(tableName, data,
+
+    // Check if the "users" table exists
+    var tableExists = await database.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='users'");
+    if (tableExists.isEmpty) {
+      // Execute the script to create the "users" table
+      await database.execute('''
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+             name TEXT,
+              role TEXT,
+              birth_date TEXT,
+              location TEXT,
+              phone_number TEXT,
+              email TEXT,
+              verified,
+              flag INTEGER,
+             create_date TEXT
+      )
+    ''');
+    }
+    
+    // Insert data into the "users" table
+    int id = await database.insert('users', data,
         conflictAlgorithm: ConflictAlgorithm.replace);
+
     return id;
   }
 
-  static Future<bool> deleteRecord(int id) async {
+  static Future<bool> deleteUser(int id) async {
     final database = await DBHelper.getDatabase();
     database.rawQuery("""delete from  ${tableName}  where id=?""", [id]);
     return true;

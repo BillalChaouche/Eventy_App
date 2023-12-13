@@ -1,8 +1,8 @@
+import 'package:eventy/EndPoints/endpoints.dart';
 import 'package:eventy/screens/Common/ChoicePages/User_Organization.dart';
 import 'package:eventy/widgets/buildbutton_function.dart';
 import 'package:eventy/widgets/buildemail_function.dart';
 import 'package:eventy/widgets/buildpassword_function.dart';
-import 'package:eventy/screens/Common/RegistrationPages/signup_user.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -13,6 +13,9 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     var rememberPassword = false;
@@ -34,6 +37,7 @@ class _LoginState extends State<Login> {
 
           // Text Row
           Form(
+            key: _formKey,
             child: Center(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -49,8 +53,9 @@ class _LoginState extends State<Login> {
                   const SizedBox(
                     height: 50.0,
                   ),
-                  buildemailwidget(),
-                  buildpasswordwidget('Password'),
+                  buildemailwidget(_emailController),
+                  buildpasswordwidget('Password', _passwordController,
+                      _passwordController, _formKey),
 
                   Padding(
                     padding: const EdgeInsets.only(left: 20, right: 20),
@@ -92,8 +97,29 @@ class _LoginState extends State<Login> {
                           16), // Add some spacing between checkbox and button
                   buildbutton(
                       text: 'Login',
-                      functionallityButton: () {
-                        Navigator.pushNamed(context, '/');
+                      functionallityButton: () async {
+                        String enteredEmail = _emailController.text;
+                        String enteredPassword = _passwordController.text;
+
+                        print("Entered Email: $enteredEmail");
+                        print("Entered Password: $enteredPassword");
+                        Map<String, dynamic> userData = {
+                          'email': enteredEmail,
+                          'password': enteredPassword,
+                        };
+                        var response = await login(userData);
+                        if (response) {
+                          Navigator.pushNamed(context, '/');
+                        } else {
+                          // Show SnackBar for unsuccessful login
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Login unsuccessful. Please check your credentials.'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }),
                   const SizedBox(
                     height: 30,
