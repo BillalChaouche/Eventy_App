@@ -1,6 +1,6 @@
 <?php
 
-include("init.php");
+include(__DIR__."/../init.php");
 
 function insertEvent($data)
 {
@@ -124,6 +124,24 @@ function filteredSearch($data)
     return $results;
 
 }
+
+
+function selectOrganizerEvents($organizer_id)
+{
+    global $db;
+
+    // Sanitize input (consider using prepared statements)
+    $organizer_id = intval($organizer_id);
+
+    // Build the SQL query to select events for a specific organizer
+    $sql = "SELECT * FROM events WHERE organizer_id = $organizer_id";
+
+    // Execute the query and fetch results
+    $results = $db->query($sql)->fetchAll();
+
+    return $results;
+}
+
 
 
 

@@ -1,5 +1,5 @@
 <?php
-include("init.php");
+include(__DIR__."/../init.php");
 
 class DBUsers
 {

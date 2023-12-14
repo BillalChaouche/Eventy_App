@@ -1,6 +1,6 @@
 <?php
 
-include("./database/db_events.php");
+include(__DIR__."/../database/db_events.php");
 
 // Read JSON input from the request
 $json_input = file_get_contents('php://input');
