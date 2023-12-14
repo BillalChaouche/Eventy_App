@@ -1,3 +1,5 @@
+import 'package:eventy/EndPoints/endpoints.dart';
+import 'package:eventy/databases/DBUserOrganizer.dart';
 import 'package:eventy/widgets/buildbutton_function.dart';
 import 'package:eventy/widgets/buildemail_function.dart';
 import 'package:eventy/widgets/buildpassword_function.dart';
@@ -14,6 +16,15 @@ class SignUpUser extends StatefulWidget {
 }
 
 class _SignUpUserState extends State<SignUpUser> {
+  final TextEditingController _usernameController = TextEditingController();
+  
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,6 +45,7 @@ class _SignUpUserState extends State<SignUpUser> {
 
           // Text Row
           Form(
+            key: _formKey,
             child: Center(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -49,21 +61,43 @@ class _SignUpUserState extends State<SignUpUser> {
                   const SizedBox(
                     height: 30.0,
                   ),
-                  buildusernamewidget(),
-                  buildemailwidget(),
-                  buildpasswordwidget('Password'),
-                  buildpasswordwidget('Confirm password'),
+                  buildusernamewidget(_usernameController),
+                  buildemailwidget(_emailController),
+                  buildpasswordwidget('Password', _passwordController,
+                      _confirmPasswordController, _formKey),
+                  buildpasswordwidget(
+                      'Confirm password',
+                      _confirmPasswordController,
+                      _passwordController,
+                      _formKey),
                   const SizedBox(
                       height:
                           30), // Add some spacing between checkbox and button
                   buildbutton(
                     text: 'SignUp',
                     functionallityButton: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const EmailVerification()),
-                      );
+                      if (_formKey.currentState!.validate()) {
+                        // Form is valid, process the data
+                        String enteredEmail = _emailController.text;
+                        String enteredPassword = _passwordController.text;
+                        String enteredUsername = _usernameController.text;
+
+                        print("Entered Username: $enteredUsername");
+                        print("Entered Email: $enteredEmail");
+                        print("Entered Password: $enteredPassword");
+                        Map<String, dynamic> userData = {
+                          'name': enteredUsername,
+                          'email': enteredEmail,
+                          'password': enteredPassword,
+                        };
+                        signup(userData);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const EmailVerification()),
+                        );
+                      }
+                      ;
                     },
                   ),
                   const SizedBox(

@@ -30,13 +30,33 @@ class DBHelper {
       onUpgrade: (database, oldVersion, newVersion) {
         print(">>>>>>>>>>>>>$oldVersion vs $newVersion");
         if (oldVersion != newVersion) {
-          database.execute('DROP TABLE IF EXISTS User_Organizer');
-          database.execute('DROP TABLE IF EXISTS Event');
-          database.execute('DROP TABLE IF EXISTS Categories');
+          database.execute('DROP TABLE IF EXISTS users');
+          database.execute('DROP TABLE IF EXISTS events');
+          database.execute('DROP TABLE IF EXISTS categories');
           for (var sql_code in sql_create_code) database.execute(sql_code);
         }
       },
     );
     return database;
+  }
+
+  static Future<void> deleteDatabase() async {
+    final db = await database;
+
+    // Add code here to delete all tables
+    await db.execute('DROP TABLE IF EXISTS users');
+    print("drop table users");
+    await db.execute('DROP TABLE IF EXISTS events');
+    print("drop table events");
+    await db.execute('DROP TABLE IF EXISTS categories');
+    print("drop table categories");
+
+    // Recreate the tables
+    List<String> sql_create_code = [
+      DBUserOrganizer.sql_code,
+      DBEvent.sql_code,
+      DBCategory.sql_code,
+    ];
+    for (var sql_code in sql_create_code) await db.execute(sql_code);
   }
 }

@@ -2,9 +2,9 @@ import 'package:sqflite/sqflite.dart';
 import 'DBHelper.dart';
 
 class DBEvent {
-  static const tableName = 'Event';
+  static const tableName = 'events';
 
-  static const sql_code = '''CREATE TABLE IF NOT EXISTS companies (
+  static const sql_code = '''CREATE TABLE IF NOT EXISTS events (
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              remote_id INTEGER,
               title TEXT,

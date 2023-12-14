@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-Widget buildboxwidget() {
+Widget buildboxwidget({required TextEditingController controller}) {
   return SizedBox(
     height: 70,
     width: 65,
     child: TextField(
+      controller: controller,
       style: TextStyle(
         fontSize: 18, // Adjust the font size as needed
         fontWeight: FontWeight.bold, // Adjust the font weight as needed
