@@ -112,6 +112,7 @@ class _LoginState extends State<Login> {
                         var organizerresponse = await organizerlogin(userData);
                         if (userresponse) {
                           SharedData.instance.sharedVariable = 'User';
+
                           Navigator.pushNamedAndRemoveUntil(
                               context, '/', (route) => false);
                         } else if (organizerresponse) {
@@ -119,6 +120,7 @@ class _LoginState extends State<Login> {
                           Navigator.pushNamedAndRemoveUntil(
                               context, '/', (route) => false);
                         } else {
+
                           // Show SnackBar for unsuccessful login
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

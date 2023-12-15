@@ -48,16 +48,27 @@ class _SettingsScreenState extends State<SettingsOrganizerScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
+
                     color: Colors.red,
                     width: 2.0,
                   ),
+
+                    color: Colors.red, 
+                    width: 2.0, 
+                  ),
+
+
                 ),
                 child: GestureDetector(
                   onTap: () {
                     // Handle logout
                     DBHelper.deleteDatabase();
+
                     Navigator.pushNamedAndRemoveUntil(
                         context, '/login', (route) => false);
+
+                    
+
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

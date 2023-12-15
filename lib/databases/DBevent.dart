@@ -8,6 +8,7 @@ class DBEvent {
   static const tableName = 'Events';
 
   static const sql_code = '''CREATE TABLE IF NOT EXISTS Events (
+
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              remote_id INTEGER,
               title TEXT,

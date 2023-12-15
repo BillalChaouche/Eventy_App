@@ -2,7 +2,9 @@ import 'package:cron/cron.dart';
 import 'package:eventy/EndPoints/endpoints.dart';
 import 'package:eventy/RootPage.dart';
 import 'package:eventy/Providers/EventProvider.dart';
+
 import 'package:eventy/databases/DBevent.dart';
+
 import 'package:eventy/screens/Common/RegistrationPages/login.dart';
 import 'package:eventy/screens/Organizer/ProfilePages/Profile.dart';
 import 'package:eventy/screens/User/EventPages/AcceptedEvent.dart';
@@ -57,7 +59,9 @@ class MainApp extends StatelessWidget {
           '/home': (context) => Home(),
           '/homeOrg': (context) => HomeOrganizer(),
           '/login': (context) => Login(),
+
           '/Settings': (context) => SettingsScreen(),
+
           '/ProfileOrg': (context) => ProfileOrg()
         },
       ),
