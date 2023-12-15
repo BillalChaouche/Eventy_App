@@ -15,7 +15,26 @@ if (!isset($data['action'])) {
     respondError('Action is required');
 }
 
+
 switch ($data['action']) {
+    case 'getEvents':
+        $email = $data['email'];
+        
+        // Fetch user ID based on the provided email
+        $user = $db->query("SELECT * FROM organizers WHERE email = ?", $email)->fetchAll();
+        
+        if ($user) {
+            $userId = $user[0]['id']; // Extract the user ID
+            $items = $items = $db->query("SELECT events.*, categories.name AS category
+            FROM events
+            INNER JOIN categories ON events.category_id = categories.id", $userId)->fetchAll();
+            echo json_encode($items);
+            exit;
+        }
+        else{
+            echo json_encode(array("error" => "User not found"));
+            exit;
+        }
     case 'insertEvent':
         validateRequiredFields(['title', 'date', 'time', 'organizer_id', 'category_id'], $data);
         $response = insertEvent($data);
