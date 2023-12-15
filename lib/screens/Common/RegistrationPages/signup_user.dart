@@ -1,5 +1,6 @@
 import 'package:eventy/EndPoints/endpoints.dart';
 import 'package:eventy/databases/DBUserOrganizer.dart';
+import 'package:eventy/models/SharedData.dart';
 import 'package:eventy/widgets/buildbutton_function.dart';
 import 'package:eventy/widgets/buildemail_function.dart';
 import 'package:eventy/widgets/buildpassword_function.dart';
@@ -17,7 +18,7 @@ class SignUpUser extends StatefulWidget {
 
 class _SignUpUserState extends State<SignUpUser> {
   final TextEditingController _usernameController = TextEditingController();
-  
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -85,12 +86,18 @@ class _SignUpUserState extends State<SignUpUser> {
                         print("Entered Username: $enteredUsername");
                         print("Entered Email: $enteredEmail");
                         print("Entered Password: $enteredPassword");
+                        print(
+                            "sign up as: ${SharedData.instance.sharedVariable}");
                         Map<String, dynamic> userData = {
                           'name': enteredUsername,
                           'email': enteredEmail,
                           'password': enteredPassword,
                         };
-                        signup(userData);
+                        if (SharedData.instance.sharedVariable == "User") {
+                          userSignup(userData);
+                        } else {
+                          organizerSignup(userData);
+                        }
                         Navigator.push(
                           context,
                           MaterialPageRoute(

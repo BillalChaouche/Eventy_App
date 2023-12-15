@@ -27,8 +27,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
         print(userData[0]);
         if (userData[0]['verified'] == 1) {
           print("this user is verified");
-          Navigator.of(context)
-              .pushReplacement(MaterialPageRoute(builder: (_) => RootPage()));
+          Navigator.pushNamed(context, '/');
         } else {
           print("this user is not verified");
           Navigator.of(context).pushReplacement(
