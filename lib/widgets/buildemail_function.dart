@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-Widget buildemailwidget() {
+Widget buildemailwidget(TextEditingController controller) {
   return Padding(
     padding: const EdgeInsets.only(left: 20 , right: 20 , top: 20),
     child: TextFormField(
+      controller: controller,
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.email),
         label: Text('Email'),

@@ -10,6 +10,7 @@ class EventProvider extends ChangeNotifier {
     try {
       await Future.delayed(Duration(seconds: 4));
       List<Map<String, dynamic>> maps = await DBEvent.getAllEvents();
+      print(maps);
       events = convertToEventsList(maps);
       if (events.isEmpty) {
         noData = true;
@@ -88,8 +89,8 @@ class EventProvider extends ChangeNotifier {
           map['imagePath'] as String,
           map['attendees'] as int, // Set a default value if null
           map['description'] as String,
-          map['saved'] as int,
-          map['booked'] as int,
+          map['saved'] as int, // Default value for saved if null
+          map['booked'] as int, // Default value for booked if null
           map['accepted'] as int,
           map['organizer'] as String,
           [map['category'] as String] // Convert category to a list

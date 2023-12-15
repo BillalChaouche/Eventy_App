@@ -153,7 +153,7 @@ class _EventState extends State<Event> {
               )
             ]),
         bottomNavigationBar: Container(
-          height: 60, // Set the height of the bottom navbar
+          height: 80, // Set the height of the bottom navbar
           decoration: BoxDecoration(
             // Set background color to white
             boxShadow: [

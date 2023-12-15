@@ -9,5 +9,5 @@ class SharedData {
   static SharedData get instance => _instance;
 
   // Your shared variable
-  String sharedVariable = 'User';
+  String sharedVariable = 'Organizer';
 }

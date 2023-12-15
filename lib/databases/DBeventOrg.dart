@@ -4,10 +4,10 @@ import 'package:eventy/databases/DBUserOrganizer.dart';
 import 'package:sqflite/sqflite.dart';
 import 'DBHelper.dart';
 
-class DBEvent {
-  static const tableName = 'Events';
+class DBEventOrg {
+  static const tableName = 'EventsOrg';
 
-  static const sql_code = '''CREATE TABLE IF NOT EXISTS Events (
+  static const sql_code = '''CREATE TABLE IF NOT EXISTS EventsOrg (
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              remote_id INTEGER,
               title TEXT,
@@ -17,12 +17,7 @@ class DBEvent {
               description TEXT,
               attendees INTEGER,
               location TEXT,
-              organizer TEXT,
               category TEXT,
-              booked INTEGER,
-              accepted INTEGER,
-              saved INTEGER,
-              scanned INTEGER,
               code INTEGER,
               flag INTEGER,
               create_date TEXT
@@ -43,13 +38,7 @@ class DBEvent {
             description,
             attendees,
             location,
-            organizer,
             category,
-            booked,
-            accepted,
-            saved,
-            scanned,
-            code,
             flag
           from ${tableName}
           order by title ASC
@@ -72,13 +61,7 @@ class DBEvent {
             description,
             attendees,
             location,
-            organizer,
             category,
-            booked,
-            accepted,
-            saved,
-            scanned,
-            code,
             flag
           from ${tableName}
           Where LOWER(title) like '%${keyword.toLowerCase()}%' 
@@ -103,65 +86,12 @@ class DBEvent {
             description,
             attendees,
             location,
-            organizer,
             category,
-            booked,
-            accepted,
-            saved,
-            scanned,
-            code,
             flag
           from ${tableName}
           Where LOWER(category) like '%${category.toLowerCase()}%' 
           order by title ASC
           ''');
-  }
-
-  static Future<List<Map<String, dynamic>>> getAllEventsByFilter(
-      String date, String location) async {
-    final database = await DBHelper.getDatabase();
-
-    if ((date.isEmpty || date.trim() == '' || date == 'Any Time') &&
-        (location.isEmpty ||
-            location.trim() == '' ||
-            location == 'Choose Wilaya')) {
-      return getAllEvents(); // You might need to implement this method
-    }
-
-    DateTime now = DateTime.now();
-    late String formattedDate;
-
-    switch (date) {
-      case 'Today':
-        formattedDate =
-            '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-        return await database.rawQuery(
-            "SELECT * FROM events WHERE date = '$formattedDate' AND location = '$location'");
-      case 'Tomorrow':
-        DateTime tomorrow = now.add(Duration(days: 1));
-        formattedDate =
-            '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
-        return await database.rawQuery(
-            "SELECT * FROM events WHERE date = '$formattedDate' AND location = '$location'");
-      case 'This Week':
-        DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-        DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
-        String startDate =
-            '${startOfWeek.year}-${startOfWeek.month.toString().padLeft(2, '0')}-${startOfWeek.day.toString().padLeft(2, '0')}';
-        String endDate =
-            '${endOfWeek.year}-${endOfWeek.month.toString().padLeft(2, '0')}-${endOfWeek.day.toString().padLeft(2, '0')}';
-        return await database.rawQuery(
-            "SELECT * FROM events WHERE date BETWEEN '$startDate' AND '$endDate' AND location = '$location'");
-      case 'This Month':
-        String startDate =
-            '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
-        String endDate =
-            '${now.year}-${now.month.toString().padLeft(2, '0')}-${DateTime(now.year, now.month + 1, 0).day.toString().padLeft(2, '0')}';
-        return await database.rawQuery(
-            "SELECT * FROM events WHERE date BETWEEN '$startDate' AND '$endDate' AND location = '$location'");
-      default:
-        return []; // Handle other cases as needed
-    }
   }
 
   static Future<int> getAllCount() async {
@@ -179,14 +109,20 @@ class DBEvent {
 
     return database.rawQuery('''SELECT 
             id ,
-            remote_id, 
-            saved,
-            booked
+            remote_id,
+            title,
+            imagePath,
+            date,
+            time ,
+            description,
+            attendees,
+            location,
+            category,
           from ${tableName}
           where flag=1
           ''');
   }
-
+/*
   static Future<bool> uploadModification() async {
     List modifiedData = await getEventsTomodify();
     int event_id = 0;
@@ -205,6 +141,7 @@ class DBEvent {
     }
     return true;
   }
+  */
 
   static Future<bool> syncEvents(List<Map<String, dynamic>> remote_data) async {
     List local_data = await getAllEvents();
@@ -229,14 +166,8 @@ class DBEvent {
           'time': item['time'],
           'description': item['description'],
           'location': item['location'],
-          'organizer': item['organizer_id'],
           'category': item['category'],
           'attendees': item['attendees'],
-          'booked': booked,
-          'accepted': accepted,
-          'saved': saved,
-          'scanned': item['scanned'],
-          'code': item['code'],
           'flag': 0
         });
 
@@ -253,14 +184,8 @@ class DBEvent {
           'time': item['time'],
           'description': item['description'],
           'location': item['location'],
-          'organizer': item['organizer_id'],
           'category': item['category'],
           'attendees': item['attendees'],
-          'booked': booked,
-          'accepted': accepted,
-          'saved': saved,
-          'scanned': item['scanned'],
-          'code': item['code'],
           'flag': 0
         });
       }
@@ -272,13 +197,11 @@ class DBEvent {
   static Future<bool> service_sync_events() async {
     print("Running Cron Service to get Events");
     List<Map<String, dynamic>> user = await DBUserOrganizer.getUser();
-    String userEmail = user[0]['email'];
-    List? remote_data = await endpoint_api_get(AppConfig.backendBaseUrl +
-        "operations_user_event.php?action=events.get&email=${userEmail}");
+    String orgEmail = user[0]['email'];
+    List? remote_data = await endpoint_fetch_org_events(orgEmail);
 
     if (remote_data != null) {
-      print(remote_data);
-      await DBEvent.syncEvents(remote_data as List<Map<String, dynamic>>);
+      await DBEventOrg.syncEvents(remote_data as List<Map<String, dynamic>>);
       return true;
     }
     return false;
