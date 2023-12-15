@@ -9,9 +9,9 @@ class EventEntity {
   late String imgPath;
   late int attendcees;
   late String description;
-  late bool saved;
-  late bool booked;
-  late bool accepted;
+  late int saved;
+  late int booked;
+  late int accepted;
   late String organizer;
   late List categories;
 
@@ -31,6 +31,10 @@ class EventEntity {
       this.categories);
 
   void toggleSaved() {
-    saved = !saved;
+    saved = (saved == 0) ? 1 : 0;
+  }
+
+  void toggleBooked() {
+    booked = (booked == 0) ? 1 : 0;
   }
 }

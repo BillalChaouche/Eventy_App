@@ -1,20 +1,24 @@
+import 'package:eventy/Static/AppConfig.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-Future<List<Map<String, dynamic>>?> endpoint_api_get_categories() async {
-  //This can be improved by placing API endpoints into a constant dart file
+import 'dart:async';
+
+Future<List<Map<String, dynamic>>?> endpoint_api_get(String url) async {
   try {
-    final response = await http.get(Uri.parse(
-        'http://192.168.196.162/eventyBackend/index.php/?action=categories.get'));
-    print("${response.statusCode}");
-    if (response.statusCode == 200) {
+    final response = await Future.any([
+      http.get(Uri.parse(url)),
+      Future.delayed(Duration(seconds: 15)),
+    ]);
+
+    if (response is http.Response && response.statusCode == 200) {
       List<Map<String, dynamic>> ret =
           List<Map<String, dynamic>>.from(jsonDecode(response.body));
       return ret;
     }
   } catch (error) {
-    print("Error ${error.toString()}");
+    print("Error: ${error.toString()}");
     return null;
   }
-  return null;
+  return null; // Return null if the endpoint doesn't respond within 15 seconds
 }

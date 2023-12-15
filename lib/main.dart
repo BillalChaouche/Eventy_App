@@ -19,6 +19,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:eventy/databases/DBcategory.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final cron = Cron();
+  cron.schedule(Schedule.parse('*/5 * * * *'), () async {
+    DBCategory.service_sync_categories();
+  });
+
   runApp(const MainApp());
 }
 
@@ -32,7 +39,7 @@ class MainApp extends StatelessWidget {
           EventProvider(), // Create an instance of EventProvider
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: '/Splash',
+        initialRoute: '/',
         routes: {
           '/': (context) => RootPage(), // Wrap Home widget with EventProvider
           '/filter': (context) => Filter(),

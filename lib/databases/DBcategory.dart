@@ -1,4 +1,5 @@
 import 'package:eventy/EndPoints/endpoints.dart';
+import 'package:eventy/Static/AppConfig.dart';
 import 'package:sqflite/sqflite.dart';
 import 'DBHelper.dart';
 
@@ -24,6 +25,7 @@ class DBCategory {
           ''');
   }
 
+  /*
   static Future<int> getCategoryByName(String name) async {
     final database = await DBHelper.getDatabase();
 
@@ -45,10 +47,11 @@ class DBCategory {
           ''');
     return res[0]['cc'] ?? 0;
   }
-
+  */
   static Future<bool> service_sync_categories() async {
     print("Running Cron Service to get Categories");
-    List? remote_data = await endpoint_api_get_categories();
+    List? remote_data = await endpoint_api_get(
+        AppConfig.backendBaseUrl + 'categories.php/?action=categories.get');
 
     if (remote_data != null) {
       await DBCategory.syncCategories(

@@ -2,11 +2,13 @@ import 'dart:ui';
 
 import 'package:eventy/Components/pageAppBar.dart';
 import 'package:eventy/Components/DropDown.dart';
+import 'package:eventy/Providers/EventProvider.dart';
 import 'package:eventy/widgets/floatingButtonWidget.dart';
 import 'package:eventy/widgets/leftTitleWidget.dart';
 import 'package:eventy/widgets/timeButtonWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:provider/provider.dart';
 
 class Filter extends StatefulWidget {
   const Filter({super.key});
@@ -243,6 +245,8 @@ class _FilterState extends State<Filter> {
 
   void startFilter() {
     // start the operation
+    Provider.of<EventProvider>(context, listen: false)
+        .getEventsByFilter(time, location);
     Navigator.pop(context);
   }
 }

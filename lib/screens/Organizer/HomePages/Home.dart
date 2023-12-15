@@ -22,9 +22,9 @@ class HomeOrganizer extends StatefulWidget {
         'assets/images/UIUXEvent.jpg',
         200,
         "Is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
-        true,
-        false,
-        false,
+        1,
+        0,
+        0,
         'Ashraf', [
       'Education',
       'Learning',
@@ -39,9 +39,9 @@ class HomeOrganizer extends StatefulWidget {
         'assets/images/gamingEvent.jpg',
         300,
         '',
-        true,
-        false,
-        false,
+        1,
+        0,
+        0,
         'Ashraf',
         ['Art', 'IT'])
   ];
@@ -145,7 +145,8 @@ class _Home extends State<HomeOrganizer> {
                 searchBarWidget(
                     hintText: "Search for events",
                     filter: false,
-                    buttonFunctionality: () {}),
+                    buttonFunctionality: () {},
+                    context: context),
                 const SizedBox(height: 25),
 
                 leftTitleWidget('Events', 18),

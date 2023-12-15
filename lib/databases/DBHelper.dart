@@ -9,7 +9,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static const _database_name = "Eventy.db";
-  static const _database_version = 16;
+  static const _database_version = 17;
   static var database;
 
   static Future getDatabase() async {
@@ -31,7 +31,7 @@ class DBHelper {
         print(">>>>>>>>>>>>>$oldVersion vs $newVersion");
         if (oldVersion != newVersion) {
           database.execute('DROP TABLE IF EXISTS User_Organizer');
-          database.execute('DROP TABLE IF EXISTS Event');
+          database.execute('DROP TABLE IF EXISTS Events');
           database.execute('DROP TABLE IF EXISTS Categories');
           for (var sql_code in sql_create_code) database.execute(sql_code);
         }

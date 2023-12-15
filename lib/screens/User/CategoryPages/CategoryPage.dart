@@ -115,7 +115,8 @@ class _CategoryPage extends State<CategoryPage> {
                 searchBarWidget(
                     hintText: "Search for events",
                     filter: true,
-                    buttonFunctionality: showFilter),
+                    buttonFunctionality: showFilter,
+                    context: context),
 
                 const SizedBox(height: 30),
 

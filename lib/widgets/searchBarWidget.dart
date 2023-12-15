@@ -1,12 +1,16 @@
+import 'package:eventy/Providers/EventProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:provider/provider.dart';
 
 typedef ButtonFunctionality = void Function();
 
-Widget searchBarWidget(
-    {required String hintText,
-    required bool filter,
-    required ButtonFunctionality buttonFunctionality}) {
+Widget searchBarWidget({
+  required String hintText,
+  required bool filter,
+  required ButtonFunctionality buttonFunctionality,
+  required BuildContext context,
+}) {
   return Container(
     margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
     padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
@@ -35,6 +39,10 @@ Widget searchBarWidget(
             width: 13), // Add space between search icon and input field
         Expanded(
           child: TextFormField(
+            onChanged: (text) {
+              Provider.of<EventProvider>(context, listen: false)
+                  .getEventsByName(text);
+            },
             decoration: InputDecoration(
               fillColor: Colors.grey,
               hintText: hintText, // Placeholder text

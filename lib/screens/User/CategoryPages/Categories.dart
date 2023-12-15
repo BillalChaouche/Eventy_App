@@ -34,7 +34,6 @@ class _CategoriesState extends State<Categories> {
   }
 
   Future<List<Map<String, dynamic>>> fetchingCategories() async {
-    await DBCategory.service_sync_categories();
     return await DBCategory.getAllCategories();
   }
 

@@ -1,7 +1,102 @@
+import 'package:eventy/databases/DBevent.dart';
 import 'package:eventy/models/EventEntity.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class EventProvider extends ChangeNotifier {
+  List<EventEntity> events = [];
+  bool noData = false;
+  Future<void> getEvents() async {
+    try {
+      await Future.delayed(Duration(seconds: 4));
+      List<Map<String, dynamic>> maps = await DBEvent.getAllEvents();
+      events = convertToEventsList(maps);
+      if (events.isEmpty) {
+        noData = true;
+      } else {
+        noData = false;
+      }
+      notifyListeners();
+    } catch (e) {}
+  }
+
+  Future<void> getEventsByCategory(String category) async {
+    try {
+      List<Map<String, dynamic>> maps =
+          await DBEvent.getAllEventsByCategory(category);
+      events = convertToEventsList(maps);
+      if (events.isEmpty) {
+        noData = true;
+      } else {
+        noData = false;
+      }
+      notifyListeners();
+    } catch (e) {}
+  }
+
+  Future<void> getEventsByName(String name) async {
+    try {
+      List<Map<String, dynamic>> maps =
+          await DBEvent.getAllEventsByKeyword(name);
+      events = convertToEventsList(maps);
+      if (events.isEmpty) {
+        noData = true;
+      } else {
+        noData = false;
+      }
+      notifyListeners();
+    } catch (e) {}
+  }
+
+  Future<void> getEventsByFilter(String date, String location) async {
+    try {
+      List<Map<String, dynamic>> maps =
+          await DBEvent.getAllEventsByFilter(date, location);
+      events = convertToEventsList(maps);
+      if (events.isEmpty) {
+        noData = true;
+      } else {
+        noData = false;
+      }
+      notifyListeners();
+    } catch (e) {}
+  }
+
+  /*Future<void> getEventsByFilter(String location, String time) async {
+    try {
+      List<Map<String, dynamic>> maps =
+          await DBEvent.getAllEventsByFilter(location, time);
+      events = convertToEventsList(maps);
+      print(events);
+      notifyListeners();
+    } catch (e) {}
+  }
+  */
+  Future<void> emptyEvents() async {
+    events = [];
+    notifyListeners();
+  }
+
+  List<EventEntity> convertToEventsList(List<Map<String, dynamic>> maps) {
+    return maps.map((map) {
+      return EventEntity(
+          map['id'] as int,
+          map['title'] as String,
+          map['location'] as String,
+          map['date'] as String,
+          map['time'] as String,
+          map['imagePath'] as String,
+          map['attendees'] as int, // Set a default value if null
+          map['description'] as String,
+          map['saved'] as int,
+          map['booked'] as int,
+          map['accepted'] as int,
+          map['organizer'] as String,
+          [map['category'] as String] // Convert category to a list
+          );
+    }).toList();
+  }
+  /*
   List<EventEntity> events = [
     EventEntity(
         1,
@@ -71,10 +166,21 @@ class EventProvider extends ChangeNotifier {
 
     // Add more events as needed
   ];
+  */
 
-  void toggleEventSavedState(int index) {
-    events[index].toggleSaved();
-    print("${index} -- ${events[index].saved}");
+  Future<void> toggleEventSavedState(int id) async {
+    await DBEvent.updateSpecific(id, 'saved');
+    await DBEvent.uploadModification();
+    EventEntity foundEvent = events.firstWhere((event) => event.id == id);
+    foundEvent.toggleSaved();
+    notifyListeners();
+  }
+
+  Future<void> toggleEventBookedState(int id) async {
+    await DBEvent.updateSpecific(id, 'booked');
+    await DBEvent.uploadModification();
+    EventEntity foundEvent = events.firstWhere((event) => event.id == id);
+    foundEvent.toggleBooked();
     notifyListeners();
   }
 }
