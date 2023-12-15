@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:eventy/Providers/EventProvider.dart';
+import 'package:eventy/databases/DBeventOrg.dart';
 import 'package:eventy/screens/Organizer/EventPages/Event.dart';
 import 'package:eventy/screens/Organizer/NotificationsPages/NotificationsPage.dart';
 import 'package:eventy/widgets/cirlceIconWidget.dart';
@@ -10,49 +13,53 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:eventy/models/EventEntity.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomeOrganizer extends StatefulWidget {
-  static List<EventEntity> events = [
-    EventEntity(
-        1,
-        'UX/UI Tutorial Events',
-        'Ensia School',
-        '2023/01/21',
-        '4:50 PM',
-        'assets/images/UIUXEvent.jpg',
-        200,
-        "Is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
-        true,
-        false,
-        false,
-        'Ashraf', [
-      'Education',
-      'Learning',
-      'IT'
-    ]), // Example events; you may have a list of actual events here
-    EventEntity(
-        2,
-        'Gaming Tutorial Events',
-        'Algiers',
-        '2023/01/24',
-        '10:00 AM',
-        'assets/images/gamingEvent.jpg',
-        300,
-        '',
-        true,
-        false,
-        false,
-        'Ashraf',
-        ['Art', 'IT'])
-  ];
+  static late List<EventEntity> events = [];
   @override
   _Home createState() => _Home();
 }
 
 class _Home extends State<HomeOrganizer> {
+  bool _isLoading = true;
+  late Timer _timer;
+  late RefreshController _refreshController;
   final ScrollController _scrollController = ScrollController();
   bool showText = false; // Default text for the AppBar
   double heightAppBar = 0;
+  Future<bool> getEvents() async {
+    try {
+      await Future.delayed(Duration(seconds: 4));
+      await DBEventOrg.service_sync_events();
+      List<Map<String, dynamic>> maps = await DBEventOrg.getAllEvents();
+      print(maps);
+      HomeOrganizer.events = convertToEventsList(maps);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  List<EventEntity> convertToEventsList(List<Map<String, dynamic>> maps) {
+    return maps.map((map) {
+      return EventEntity(
+          map['id'] as int,
+          map['title'] as String,
+          map['location'] as String,
+          map['date'] as String,
+          map['time'] as String,
+          map['imagePath'] as String,
+          map['attendees'] as int, // Set a default value if null
+          map['description'] as String,
+          0,
+          0,
+          0,
+          '',
+          [map['category'] as String] // Convert category to a list
+          );
+    }).toList();
+  }
 
   @override
   void initState() {
@@ -60,6 +67,44 @@ class _Home extends State<HomeOrganizer> {
     _scrollController.addListener(_onScroll);
     showText = false;
     heightAppBar = 0;
+
+    _refreshController = RefreshController(initialRefresh: false);
+  }
+
+  void _onRefresh() async {
+    try {
+      bool syncResultE = await DBEventOrg.service_sync_events();
+
+      if (!syncResultE) {
+        _refreshController.refreshFailed();
+      }
+      await getEvents();
+      _refreshController.refreshCompleted();
+      setState(() {});
+    } catch (e) {}
+  }
+
+  void _onLoading() async {
+    try {
+      bool syncResultE = await DBEventOrg.service_sync_events();
+
+      if (!syncResultE) {
+        _refreshController.refreshFailed();
+      }
+      await getEvents();
+      _refreshController.loadComplete();
+      setState(() {});
+    } catch (e) {}
+  }
+
+  void _startLoading() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _isLoading = !_isLoading;
+        });
+      }
+    });
   }
 
   void _onScroll() {
@@ -84,6 +129,7 @@ class _Home extends State<HomeOrganizer> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -92,84 +138,149 @@ class _Home extends State<HomeOrganizer> {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // Set this property to false
       home: Scaffold(
-        extendBody: true,
-        appBar: AppBar(
-          toolbarHeight: heightAppBar,
-          elevation: 0,
-          backgroundColor: const Color.fromARGB(0, 255, 255, 255),
-          title: Center(
-            child: AnimatedOpacity(
-              opacity: showText
-                  ? 1.0
-                  : 0.0, // Change opacity based on showText value
-              duration: const Duration(milliseconds: 300),
-              child: const Text(
-                  "Events", // Dynamic text based on scroll position
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Color.fromARGB(255, 102, 37, 73))),
+          extendBody: true,
+          appBar: AppBar(
+            toolbarHeight: heightAppBar,
+            elevation: 0,
+            backgroundColor: const Color.fromARGB(0, 255, 255, 255),
+            title: Center(
+              child: AnimatedOpacity(
+                opacity: showText
+                    ? 1.0
+                    : 0.0, // Change opacity based on showText value
+                duration: const Duration(milliseconds: 300),
+                child: const Text(
+                    "Events", // Dynamic text based on scroll position
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Color.fromARGB(255, 102, 37, 73))),
+              ),
             ),
           ),
-        ),
-        // here all screen scroll
-        body: SingleChildScrollView(
-          controller: _scrollController,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              18,
-              20,
-              18,
-              0,
+          // here all screen scroll
+          body: SmartRefresher(
+            enablePullDown: true,
+            controller: _refreshController,
+            onRefresh: _onRefresh,
+            onLoading: _onLoading,
+            header: ClassicHeader(
+              refreshingIcon: const SizedBox(
+                width: 25,
+                height: 25,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF662549)),
+                ),
+              ),
+              idleIcon: const Icon(
+                Icons.refresh,
+                color: Color(0xFF662549),
+              ),
+              releaseIcon: const Icon(
+                Icons.refresh,
+                color: Color(0xFF662549),
+              ),
+              completeIcon: const Icon(
+                Ionicons.checkmark_circle_outline,
+                color: Color.fromARGB(255, 135, 244, 138),
+              ),
+              failedIcon: const Icon(Icons.error,
+                  color: const Color.fromARGB(255, 239, 92, 92)),
+              idleText: '',
+              releaseText: '',
+              refreshingText: '',
+              completeText: '',
+              failedText: 'Refresh failed',
+              textStyle: TextStyle(
+                  color: const Color.fromARGB(
+                      255, 239, 92, 92)), // Change the text color here
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  18,
+                  20,
+                  18,
+                  0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    profileWidget(47, 47, 'assets/images/OrgProfile.jpg', true,
-                        NavigateToProfilePage),
-                    circleIconWidget(47, 47, Ionicons.notifications_outline,
-                        () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => NotificationsOrganizerPage()),
-                      );
-                    }),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        profileWidget(47, 47, 'assets/images/OrgProfile.jpg',
+                            true, NavigateToProfilePage),
+                        circleIconWidget(47, 47, Ionicons.notifications_outline,
+                            () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    NotificationsOrganizerPage()),
+                          );
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+
+                    searchBarWidget(
+                        hintText: "Search for events",
+                        filter: false,
+                        buttonFunctionality: () {},
+                        context: context),
+                    const SizedBox(height: 25),
+
+                    leftTitleWidget('Events', 18),
+                    const SizedBox(height: 6),
+
+                    // and the scroll become only here on events
+                    // Replace this part of your code with the corrected FutureBuilder
+                    FutureBuilder<bool>(
+                      future:
+                          getEvents(), // Use the getEvents() function that returns a Future<bool>
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: 3,
+                            itemBuilder: (context, index) {
+                              return eventShadow();
+                            },
+                          );
+                        } else if (snapshot.hasError) {
+                          return Text(
+                              'Error: ${snapshot.error}'); // Show error if Future fails
+                        } else if (!snapshot.hasData || !snapshot.data!) {
+                          return Text(
+                              'No events available.'); // Show message when no events are retrieved
+                        } else {
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: HomeOrganizer.events.length,
+                            itemBuilder: (context, index) {
+                              var event = HomeOrganizer.events[index];
+                              return eventWidget(
+                                // Other parameters...
+                                event: event,
+                                buttonFunctionality: showEvent,
+                                save: false,
+                              );
+                            },
+                          );
+                        }
+                      },
+                    )
                   ],
                 ),
-                const SizedBox(height: 30),
-
-                searchBarWidget(
-                    hintText: "Search for events",
-                    filter: false,
-                    buttonFunctionality: () {}),
-                const SizedBox(height: 25),
-
-                leftTitleWidget('Events', 18),
-                const SizedBox(height: 6),
-
-                // and the scroll become only here on events
-                ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: HomeOrganizer.events.length,
-                    itemBuilder: (context, index) {
-                      var event = HomeOrganizer.events[index];
-                      return eventWidget(
-                        // other parameters...
-                        event: event,
-                        buttonFunctionality: showEvent,
-                        save: false,
-                      );
-                    }),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
+          )),
     );
   }
 
@@ -186,6 +297,31 @@ class _Home extends State<HomeOrganizer> {
           ),
         );
       },
+    );
+  }
+
+  Widget eventShadow() {
+    return AnimatedContainer(
+      margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+      width: double.infinity,
+      height: 170,
+      duration: Duration(milliseconds: 500),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15.0),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: _isLoading
+              ? [
+                  const Color.fromARGB(255, 221, 221, 221),
+                  const Color.fromARGB(255, 244, 244, 244)
+                ]
+              : [
+                  const Color.fromARGB(255, 244, 244, 244),
+                  const Color.fromARGB(255, 221, 221, 221)
+                ],
+        ),
+      ),
     );
   }
 

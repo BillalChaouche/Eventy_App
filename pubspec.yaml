@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   animate_do: ^3.1.2
+  cached_network_image: ^3.3.0
   cron: ^0.5.1
   cupertino_icons: ^1.0.6
   dio: ^5.4.0
@@ -38,16 +39,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets: 
-  - assets/images/profile.jpg
-  - assets/images/UIUXEvent.jpg
-  - assets/images/gamingEvent.jpg
-  - assets/images/quantumEvent.jpg
-  - assets/images/logo.png
-  - assets/icon/icon.png
-  - assets/images/onbording1.png
-  - assets/images/onbording2.png
-  - assets/images/onbording3.png
-  - assets/images/OrgProfile.jpg
+  - assets/images/
+  - assets/icon/
 icons:
   android: true
   ios: true

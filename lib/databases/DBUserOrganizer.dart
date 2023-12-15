@@ -178,7 +178,7 @@ class DBUserOrganizer {
       )
     ''');
     }
-    
+
     // Insert data into the "users" table
     int id = await database.insert('users', data,
         conflictAlgorithm: ConflictAlgorithm.replace);

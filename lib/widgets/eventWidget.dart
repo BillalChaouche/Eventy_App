@@ -1,6 +1,8 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:eventy/Providers/EventProvider.dart';
+import 'package:eventy/Static/AppConfig.dart';
 import 'package:eventy/models/EventEntity.dart';
 import 'package:eventy/widgets/blurButton.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +28,8 @@ Widget eventWidget({
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15.0),
               image: DecorationImage(
-                image: AssetImage(event.imgPath),
+                image: CachedNetworkImageProvider(
+                    AppConfig.backendBaseUrlImg + event.imgPath),
                 fit: BoxFit.cover,
               ),
             ),
@@ -75,7 +78,7 @@ Widget eventWidget({
                       ),
                       (save)
                           ? blurButton(
-                              icon: event.saved
+                              icon: (event.saved == 1)
                                   ? Ionicons.bookmark
                                   : Ionicons.bookmark_outline,
                               width: 30,
@@ -83,8 +86,7 @@ Widget eventWidget({
                               iconSize: 14,
                               color: Colors.white,
                               functionallityButton: () {
-                                eventProvider
-                                    .toggleEventSavedState(event.id - 1);
+                                eventProvider.toggleEventSavedState(event.id);
                               },
                             )
                           : Container()

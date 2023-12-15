@@ -1,6 +1,7 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:eventy/Providers/EventProvider.dart';
+import 'package:eventy/Static/AppConfig.dart';
 import 'package:eventy/models/EventEntity.dart';
 import 'package:eventy/widgets/blurButton.dart';
 import 'package:eventy/widgets/floatingButtonWidget.dart';
@@ -47,7 +48,7 @@ class _AcceptedEventState extends State<AcceptedEvent> {
                 decoration: BoxDecoration(
                   // Optional: Add border radius
                   image: DecorationImage(
-                    image: AssetImage(
+                    image: NetworkImage(AppConfig.backendBaseUrlImg +
                         event.imgPath), // Replace with your image path
                     fit: BoxFit.cover,
                   ),
@@ -79,7 +80,7 @@ class _AcceptedEventState extends State<AcceptedEvent> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             blurButton(
-                                icon: event.saved
+                                icon: (event.saved == 1)
                                     ? Ionicons.bookmark
                                     : Ionicons.bookmark_outline,
                                 width: 40,

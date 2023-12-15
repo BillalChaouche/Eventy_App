@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:eventy/Providers/EventProvider.dart';
+import 'package:eventy/Static/AppConfig.dart';
 import 'package:eventy/models/EventEntity.dart';
 import 'package:eventy/widgets/blurButton.dart';
 import 'package:eventy/widgets/categoryType.dart';
@@ -40,8 +42,9 @@ class _EventState extends State<Event> {
                 decoration: BoxDecoration(
                   // Optional: Add border radius
                   image: DecorationImage(
-                    image: AssetImage(
-                        event.imgPath), // Replace with your image path
+                    image: CachedNetworkImageProvider(
+                        AppConfig.backendBaseUrlImg +
+                            event.imgPath), // Replace with your image path
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -72,7 +75,7 @@ class _EventState extends State<Event> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             blurButton(
-                                icon: event.saved
+                                icon: (event.saved == 1)
                                     ? Ionicons.bookmark
                                     : Ionicons.bookmark_outline,
                                 width: 40,
@@ -80,8 +83,7 @@ class _EventState extends State<Event> {
                                 iconSize: 16,
                                 color: Colors.white,
                                 functionallityButton: () {
-                                  eventProvider
-                                      .toggleEventSavedState(event.id - 1);
+                                  eventProvider.toggleEventSavedState(event.id);
                                 }),
                             SizedBox(width: 10),
                             blurButton(
@@ -118,13 +120,12 @@ class _EventState extends State<Event> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    categoryType(title: 'IT'),
-                                    categoryType(title: 'Gaming'),
+                                    categoryType(title: event.categories[0]),
                                   ]),
                               SizedBox(height: 30),
                               eventDetail(
-                                  firstTitle: "29 October, 2023",
-                                  secondTitle: "10:00AM - 12:00AM",
+                                  firstTitle: event.date,
+                                  secondTitle: event.time,
                                   need: "date"),
                               SizedBox(height: 15),
                               eventDetail(
@@ -152,7 +153,7 @@ class _EventState extends State<Event> {
               )
             ]),
         bottomNavigationBar: Container(
-          height: 60, // Set the height of the bottom navbar
+          height: 80, // Set the height of the bottom navbar
           decoration: BoxDecoration(
             // Set background color to white
             boxShadow: [
@@ -165,7 +166,11 @@ class _EventState extends State<Event> {
           ),
           child: Center(
             child: flaotingButtonWidget(
-                title: 'BOOK A TICKET', buttonFunctionality: () => {}),
+                title: (event.booked == 1) ? 'ALREADY BOOKED' : 'BOOK A TICKET',
+                buttonFunctionality: () => {
+                      if (event.booked == 0)
+                        {eventProvider.toggleEventBookedState(event.id)}
+                    }),
           ),
         ),
       ); // Add elevation (shadow));

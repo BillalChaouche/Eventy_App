@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:eventy/Static/AppConfig.dart';
 import 'package:eventy/models/EventEntity.dart';
 import 'package:eventy/screens/Organizer/EventPages/editEvent.dart';
 import 'package:eventy/screens/Organizer/HomePages/Home.dart';
@@ -59,8 +61,9 @@ class _EventState extends State<Event> {
                 decoration: BoxDecoration(
                   // Optional: Add border radius
                   image: DecorationImage(
-                    image: AssetImage(
-                        event.imgPath), // Replace with your image path
+                    image: CachedNetworkImageProvider(
+                        AppConfig.backendBaseUrlImg +
+                            event.imgPath), // Replace with your image path
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -155,7 +158,7 @@ class _EventState extends State<Event> {
 
   Widget bottomScanButton() {
     return Container(
-      height: 60, // Set the height of the bottom navbar
+      height: 80, // Set the height of the bottom navbar
       decoration: BoxDecoration(
         // Set background color to white
         boxShadow: [
@@ -213,13 +216,12 @@ class _EventState extends State<Event> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      categoryType(title: 'IT'),
-                      categoryType(title: 'Gaming'),
+                      categoryType(title: event.categories[0]),
                     ]),
                 SizedBox(height: 30),
                 eventDetail(
-                    firstTitle: "29 October, 2023",
-                    secondTitle: "10:00AM - 12:00AM",
+                    firstTitle: event.date,
+                    secondTitle: event.time,
                     need: "date"),
                 SizedBox(height: 15),
                 eventDetail(
