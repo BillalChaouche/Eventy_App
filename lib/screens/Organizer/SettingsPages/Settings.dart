@@ -1,8 +1,10 @@
 import 'package:eventy/Components/PageAppBar.dart';
+import 'package:eventy/databases/DBHelper.dart';
 import 'package:eventy/models/setting.dart';
 import 'package:eventy/widgets/avatar.dart';
 import 'package:eventy/widgets/profileWidget.dart';
 import 'package:eventy/widgets/settingcart.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class SettingsOrganizerScreen extends StatefulWidget {
@@ -29,7 +31,7 @@ class _SettingsScreenState extends State<SettingsOrganizerScreen> {
                 height: 10,
               ),
               profileWidget(
-                  100, 100, "assets/images/OrgProfile.jpg", false, () {}),
+                  100, 100, "assets/images/profile.jpg", false, () {}),
               SizedBox(
                 height: 60,
               ),
@@ -37,6 +39,44 @@ class _SettingsScreenState extends State<SettingsOrganizerScreen> {
                 children: List.generate(
                   settings.length,
                   (index) => SettingTile(setting: settings[index]),
+                ),
+              ),
+              // Logout GestureDetector
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.red, 
+                    width: 2.0, 
+                  ),
+
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    // Handle logout
+                    DBHelper.deleteDatabase();
+                    Navigator.pushNamed(context, '/login');
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        CupertinoIcons.power,
+                        color: Colors.red,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Logout',
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

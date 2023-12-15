@@ -1,4 +1,5 @@
 import 'package:eventy/EndPoints/endpoints.dart';
+import 'package:eventy/models/SharedData.dart';
 import 'package:eventy/screens/Common/ChoicePages/User_Organization.dart';
 import 'package:eventy/widgets/buildbutton_function.dart';
 import 'package:eventy/widgets/buildemail_function.dart';
@@ -107,10 +108,15 @@ class _LoginState extends State<Login> {
                           'email': enteredEmail,
                           'password': enteredPassword,
                         };
-                        var response = await login(userData);
-                        if (response) {
+                        var userresponse = await userlogin(userData);
+                        var organizerresponse = await organizerlogin(userData);
+                        if (userresponse) {
+                          SharedData.instance.sharedVariable = 'User';
                           Navigator.pushNamed(context, '/');
-                        } else {
+                        } else if (organizerresponse) {
+                          SharedData.instance.sharedVariable = 'Organizer';
+                          Navigator.pushNamed(context, '/');
+                        }else{
                           // Show SnackBar for unsuccessful login
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
