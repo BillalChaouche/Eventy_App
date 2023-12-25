@@ -1,25 +1,27 @@
 <?php
 
-include(__DIR__."/../init.php");
+include(__DIR__ . "/../init.php");
 
 function insertEvent($data)
 {
     global $db;
-
-    // Sanitize input (consider using prepared statements)
     $title = $data['title'];
     $imagePath = $data['imagePath'] ?? null;
-    $date = $data['date'];
-    $time = $data['time'];
+    $start_date = $data['start_date'];
+    $end_date = $data['end_date'];
+    $start_time = $data['start_time'];
+    $end_time = $data['end_time'];
     $description = $data['description'] ?? null;
     $attendees = $data['attendees'] ?? null;
     $location = $data['location'] ?? null;
     $organizer_id = $data['organizer_id'];
     $category_id = $data['category_id'];
+    $accept_directly = $data['accept_directly'] ?? null;
+    $delete_after_deadline = $data['delete_after_deadline'] ?? null;
 
     // Insert into the events table
-    $sql = "INSERT INTO events (title, imagePath, date, time, description, attendees, location, organizer_id, category_id)
-            VALUES ('$title', '$imagePath', '$date', '$time', '$description', '$attendees', '$location', '$organizer_id', '$category_id')";
+    $sql = "INSERT INTO events (title, imagePath, start_date, end_date, accept_directly, delete_after_deadline, start_time, end_time, description, attendees, location, organizer_id, category_id)
+            VALUES ('$title', '$imagePath', '$start_date', '$end_date', '$accept_directly', '$delete_after_deadline', '$start_time', '$end_time', '$description', '$attendees', '$location', '$organizer_id', '$category_id')";
 
     // Execute the query
     $db->query($sql);
@@ -59,8 +61,8 @@ function updateEvent($eventID, $data)
     // Sanitize input (consider using prepared statements)
     $title = $data['title'];
     $imagePath = $data['imagePath'] ?? null;
-    $date = $data['date'];
-    $time = $data['time'];
+    //$date = $data['date'];
+    //$time = $data['time'];
     $description = $data['description'] ?? null;
     $attendees = $data['attendees'] ?? null;
     $location = $data['location'] ?? null;
@@ -72,8 +74,6 @@ function updateEvent($eventID, $data)
     $sql = "UPDATE events 
             SET title = '$title', 
                 imagePath = '$imagePath', 
-                date = '$date', 
-                time = '$time', 
                 description = '$description', 
                 attendees = '$attendees', 
                 location = '$location', 
