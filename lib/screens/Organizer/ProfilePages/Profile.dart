@@ -1,4 +1,4 @@
-import 'package:eventy/Components/pageAppBar.dart';
+import 'package:eventy/Components/PageAppBar.dart';
 import 'package:eventy/widgets/floatingButtonWidget.dart';
 import 'package:eventy/widgets/profileWidget.dart';
 import 'package:flutter/material.dart';

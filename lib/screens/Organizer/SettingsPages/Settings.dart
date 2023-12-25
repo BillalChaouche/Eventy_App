@@ -52,13 +52,11 @@ class _SettingsScreenState extends State<SettingsOrganizerScreen> {
                     color: Colors.red,
                     width: 2.0,
                   ),
-
-                    color: Colors.red, 
-                    width: 2.0, 
+ 
                   ),
 
 
-                ),
+                
                 child: GestureDetector(
                   onTap: () {
                     // Handle logout

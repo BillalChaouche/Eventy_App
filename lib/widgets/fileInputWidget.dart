@@ -1,6 +1,7 @@
-
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:eventy/Static/AppConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -47,7 +48,8 @@ class _FileInputWidgetState extends State<FileInputWidget> {
                 )
               : widget.DEF_IMG_PATH != null
                   ? DecorationImage(
-                      image: AssetImage(widget.DEF_IMG_PATH!),
+                      image: CachedNetworkImageProvider(
+                          AppConfig.backendBaseUrlImg + widget.DEF_IMG_PATH!),
                       fit: BoxFit.cover,
                     )
                   : null,

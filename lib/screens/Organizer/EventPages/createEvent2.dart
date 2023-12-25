@@ -8,6 +8,10 @@ import 'package:intl/intl.dart';
 import 'package:eventy/widgets/appBar.dart';
 
 class CreateEvent2 extends StatefulWidget {
+  final Map<String, dynamic> createdEvent;
+
+  const CreateEvent2({Key? key, required this.createdEvent}) : super(key: key);
+
   @override
   _CreateEvent2State createState() => _CreateEvent2State();
 }
@@ -17,6 +21,8 @@ class _CreateEvent2State extends State<CreateEvent2> {
   TextEditingController endDateController = TextEditingController();
   TextEditingController startTimeController = TextEditingController();
   TextEditingController endTimeController = TextEditingController();
+  TextEditingController locationController = TextEditingController();
+  TextEditingController availablePlacesController = TextEditingController();
 
   @override
   void initState() {
@@ -51,6 +57,25 @@ class _CreateEvent2State extends State<CreateEvent2> {
     if (selectedTime != null) {
       controller?.text = selectedTime.format(context);
     }
+  }
+
+  String convertTo24Format(String time) {
+    List<String> components = time.split(' ');
+
+    String hourMinute = components[0];
+    String amPm = components[1];
+
+    List<String> hourMinuteParts = hourMinute.split(':');
+    int hour = int.parse(hourMinuteParts[0]);
+    int minute = int.parse(hourMinuteParts[1]);
+
+    if (amPm.toLowerCase() == 'pm' && hour < 12) {
+      hour += 12;
+    } else if (amPm.toLowerCase() == 'am' && hour == 12) {
+      hour = 0;
+    }
+
+    return '$hour:${minute.toString().padLeft(2, '0')}:00';
   }
 
   @override
@@ -115,13 +140,10 @@ class _CreateEvent2State extends State<CreateEvent2> {
                       ],
                     ),
                     const SizedBox(height: 35),
-                    fullInput("Location", "Address"),
+                    fullInput("Location", "Address", locationController),
                     const SizedBox(height: 35),
-                    fullInput("City", "Enter the city"),
-                    const SizedBox(height: 35),
-                    fullInput("Country", "Your country"),
-                    const SizedBox(height: 35),
-                    fullInput("Available places", "Number of places"),
+                    fullInput("Available places", "Number of places",
+                        availablePlacesController),
                     const SizedBox(height: 35),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -130,8 +152,25 @@ class _CreateEvent2State extends State<CreateEvent2> {
                             context: context,
                             buttonText: "Next",
                             onClickListener: () {
+                              // Append input info to createdEvent map
+                              widget.createdEvent['startDate'] =
+                                  startDateController.text;
+                              widget.createdEvent['endDate'] =
+                                  endDateController.text;
+                              widget.createdEvent['startTime'] =
+                                  convertTo24Format(startTimeController.text);
+                              widget.createdEvent['endTime'] =
+                                  convertTo24Format(endTimeController.text);
+                              widget.createdEvent['location'] =
+                                  locationController.text;
+                              widget.createdEvent['availablePlaces'] =
+                                  int.parse(availablePlacesController.text);
+
+                              print(widget.createdEvent);
+
                               Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => CreateEvent3(),
+                                builder: (context) => CreateEvent3(
+                                    createdEvent: widget.createdEvent),
                               ));
                             }),
                       ],

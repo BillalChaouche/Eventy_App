@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:eventy/Components/pageAppBar.dart';
+import 'package:eventy/Components/PageAppBar.dart';
 import 'package:eventy/Components/DropDown.dart';
 import 'package:eventy/Providers/EventProvider.dart';
 import 'package:eventy/widgets/floatingButtonWidget.dart';

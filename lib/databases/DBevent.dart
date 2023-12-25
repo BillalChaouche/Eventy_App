@@ -226,8 +226,8 @@ class DBEvent {
           'title': item['title'],
           'remote_id': item['id'],
           'imagePath': item['imagePath'],
-          'date': item['date'],
-          'time': item['time'],
+          'date': item['start_date'],
+          'time': item['start_time'],
           'description': item['description'],
           'location': item['location'],
           'organizer': item['organizer_id'],
@@ -250,8 +250,8 @@ class DBEvent {
           'title': item['title'],
           'remote_id': item['id'],
           'imagePath': item['imagePath'],
-          'date': item['date'],
-          'time': item['time'],
+          'date': item['start_date'],
+          'time': item['start_time'],
           'description': item['description'],
           'location': item['location'],
           'organizer': item['organizer_id'],
@@ -273,7 +273,8 @@ class DBEvent {
   static Future<bool> service_sync_events() async {
     print("Running Cron Service to get Events");
     List<Map<String, dynamic>> user = await DBUserOrganizer.getUser();
-    String userEmail = user[0]['email'];
+    if(user.length != 0){
+      String userEmail = user[0]['email'];
     List? remote_data = await endpoint_api_get(AppConfig.backendBaseUrl +
         "operations_user_event.php?action=events.get&email=${userEmail}");
 
@@ -282,6 +283,9 @@ class DBEvent {
       await DBEvent.syncEvents(remote_data as List<Map<String, dynamic>>);
       return true;
     }
+
+    }
+    
     return false;
   }
 
