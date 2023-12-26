@@ -6,7 +6,7 @@ include("lib/utils.php");
 $dbhost = 'localhost';
 $dbuser = 'root';
 $dbname = 'eventy';
-$dbpass = 'root';
+$dbpass = '';
 
 
 $db = new db($dbhost, $dbuser, $dbpass, $dbname);
