@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Widget fullInput(String title, String hint, {String? defaultInput}) {
+Widget fullInput(String title, String hint, TextEditingController inputController) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -12,6 +12,7 @@ Widget fullInput(String title, String hint, {String? defaultInput}) {
         ),
       ),
       TextField(
+        controller : inputController,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
           hintText: hint,
@@ -24,7 +25,6 @@ Widget fullInput(String title, String hint, {String? defaultInput}) {
             borderSide: BorderSide(color: Color(0xFF662549)),
           ),
         ),
-        controller: TextEditingController(text: defaultInput ?? null),
       ),
     ],
   );

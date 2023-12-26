@@ -1,3 +1,4 @@
+import 'package:eventy/databases/DBeventOrg.dart';
 import 'package:flutter/material.dart';
 import 'package:eventy/widgets/circleStepRow.dart';
 import 'package:eventy/widgets/toggleWidget.dart';
@@ -5,8 +6,13 @@ import 'package:eventy/widgets/personalizedButtonWidget.dart';
 import 'package:eventy/widgets/appBar.dart';
 
 class CreateEvent3 extends StatelessWidget {
+  final Map<String, dynamic> createdEvent;
+
+  const CreateEvent3({Key? key, required this.createdEvent}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    bool acceptDirectly = false;
+    bool deleteAfterDeadline = false;
     return Scaffold(
       appBar: const PageAppBar(title: "Create Event"),
       body: Center(
@@ -31,15 +37,19 @@ class CreateEvent3 extends StatelessWidget {
                   const SizedBox(
                     height: 10,
                   ),
-                  toggleElement(context, "Show only to followers"),
+                  toggleElement(
+                    context,
+                    "Accept directly",
+                    (value) => acceptDirectly = value,
+                  ),
                   const SizedBox(
                     height: 10,
                   ),
-                  toggleElement(context, "Accept directly"),
-                  const SizedBox(
-                    height: 10,
+                  toggleElement(
+                    context,
+                    "Delete after the deadline",
+                    (value) => deleteAfterDeadline = value,
                   ),
-                  toggleElement(context, "Delete after the deadline"),
                 ],
               ),
             ),
@@ -47,7 +57,42 @@ class CreateEvent3 extends StatelessWidget {
               child: Container(),
             ),
             PersonalizedButtonWidget(
-                context: context, buttonText: "Finish", onClickListener: () {}),
+              context: context,
+              buttonText: "Finish",
+              onClickListener: () async {
+                print("GOING TO INSERT EVENT IN LOCAL");
+
+                // Insert the event into the EventsOrg table
+                await DBEventOrg.insertRecord({
+                  'title': createdEvent['eventName'],
+                  'imagePath': createdEvent[
+                      'imagePath'], // Add the imagePath if available
+                  'start_date': createdEvent['startDate'],
+                  'start_time': createdEvent['startTime'],
+                  'end_date': createdEvent['endDate'],
+                  'end_time': createdEvent['endTime'],
+                  'description': createdEvent['eventDescription'],
+                  'location': createdEvent['location'],
+                  'category': createdEvent['eventType'],
+                  'attendees': createdEvent['availablePlaces'],
+                  'flag': 1,
+                  'create_date': DateTime.now().toString(),
+                  'accept_directly': acceptDirectly,
+                  'delete_after_deadline': deleteAfterDeadline
+                });
+
+                print("Event inserted SUCCESSFULLY IN LOCAL DB");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('New event inserted successfully'),
+                  ),
+                );
+
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
             const SizedBox(
               height: 20,
             )
@@ -57,7 +102,10 @@ class CreateEvent3 extends StatelessWidget {
     );
   }
 
-  Container toggleElement(BuildContext context, String text) {
+  Container toggleElement(
+      BuildContext context, String text, Function(bool) onChanged) {
+    bool isSwitched = false;
+
     return Container(
       width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -66,7 +114,7 @@ class CreateEvent3 extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 14.0, // Twice the radius to get the diameter
+            width: 14.0,
             height: 14.0,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
@@ -80,7 +128,11 @@ class CreateEvent3 extends StatelessWidget {
               style: const TextStyle(fontSize: 18),
             ),
           ),
-          ToggleSwitch(),
+          ToggleSwitch(
+            onChanged: (value) {
+              onChanged(value);
+            },
+          ),
         ],
       ),
     );

@@ -47,8 +47,8 @@ class _Home extends State<HomeOrganizer> {
           map['id'] as int,
           map['title'] as String,
           map['location'] as String,
-          map['date'] as String,
-          map['time'] as String,
+          map['start_date'] as String,
+          map['start_time'] as String,
           map['imagePath'] as String,
           map['attendees'] as int, // Set a default value if null
           map['description'] as String,
@@ -67,7 +67,6 @@ class _Home extends State<HomeOrganizer> {
     _scrollController.addListener(_onScroll);
     showText = false;
     heightAppBar = 0;
-
     _refreshController = RefreshController(initialRefresh: false);
   }
 
@@ -129,7 +128,7 @@ class _Home extends State<HomeOrganizer> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _timer.cancel();
+    //_timer.cancel();
     super.dispose();
   }
 

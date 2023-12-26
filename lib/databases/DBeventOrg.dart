@@ -12,8 +12,12 @@ class DBEventOrg {
              remote_id INTEGER,
               title TEXT,
               imagePath TEXT,
-              date date,
-              time TEXT,
+              start_date date,
+              end_date date,
+              accept_directly INTEGER,
+              delete_after_deadline INTEGER,
+              start_time TEXT,
+              end_time TEXT,
               description TEXT,
               attendees INTEGER,
               location TEXT,
@@ -33,8 +37,8 @@ class DBEventOrg {
             remote_id,
             title,
             imagePath,
-            date,
-            time ,
+            start_date,
+            start_time ,
             description,
             attendees,
             location,
@@ -56,8 +60,8 @@ class DBEventOrg {
             remote_id,
             title,
             imagePath,
-            date,
-            time ,
+            start_date,
+            start_time ,
             description,
             attendees,
             location,
@@ -81,8 +85,8 @@ class DBEventOrg {
             remote_id,
             title,
             imagePath,
-            date,
-            time ,
+            start_date,
+            start_time ,
             description,
             attendees,
             location,
@@ -112,36 +116,28 @@ class DBEventOrg {
             remote_id,
             title,
             imagePath,
-            date,
-            time ,
+            start_date,
+            end_date,
+            accept_directly ,
+            delete_after_deadline ,
+            start_time ,
+            end_time,
             description,
             attendees,
             location,
-            category,
+            category
           from ${tableName}
           where flag=1
           ''');
   }
-/*
+
   static Future<bool> uploadModification() async {
     List modifiedData = await getEventsTomodify();
-    int event_id = 0;
-    int saved = 0;
-    int booked = 0;
     List<Map<String, dynamic>> user = await DBUserOrganizer.getUser();
     String userEmail = user[0]['email'];
-    for (Map item in modifiedData) {
-      event_id = item['remote_id'];
-      saved = item['saved'];
-      booked = item['booked'];
-
-      await endpoint_api_get(AppConfig.backendBaseUrl +
-          'operations_user_event.php?action=events.update&user_email=${userEmail}&event_id=${event_id}&saved=${saved}&booked=${booked}');
-      await updateFlag(item['id'], 0);
-    }
-    return true;
+    bool result = await add_event_endpoint(modifiedData, userEmail);
+    return result;
   }
-  */
 
   static Future<bool> syncEvents(List<Map<String, dynamic>> remote_data) async {
     List local_data = await getAllEvents();
@@ -162,8 +158,8 @@ class DBEventOrg {
           'title': item['title'],
           'remote_id': item['id'],
           'imagePath': item['imagePath'],
-          'date': item['date'],
-          'time': item['time'],
+          'start_date': item['start_date'],
+          'start_time': item['start_time'],
           'description': item['description'],
           'location': item['location'],
           'category': item['category'],
@@ -180,8 +176,8 @@ class DBEventOrg {
           'title': item['title'],
           'remote_id': item['id'],
           'imagePath': item['imagePath'],
-          'date': item['date'],
-          'time': item['time'],
+          'start_date': item['start_date'],
+          'start_time': item['start_time'],
           'description': item['description'],
           'location': item['location'],
           'category': item['category'],
@@ -196,8 +192,12 @@ class DBEventOrg {
 
   static Future<bool> service_sync_events() async {
     print("Running Cron Service to get Events");
+    await uploadModification();
+    print("Modifications are uploaded before sync events");
+
     List<Map<String, dynamic>> user = await DBUserOrganizer.getUser();
     String orgEmail = user[0]['email'];
+
     List? remote_data = await endpoint_fetch_org_events(orgEmail);
 
     if (remote_data != null) {
@@ -208,12 +208,17 @@ class DBEventOrg {
   }
 
   static Future<bool> updateRecord(int id, Map<String, dynamic> data) async {
+    print('Recieved data to update >>>>');
+    print(data);
+    print("                        <<<<");
     final database = await DBHelper.getDatabase();
     database.update(tableName, data, where: "id=?", whereArgs: [id]);
     return true;
   }
 
   static Future<int> insertRecord(Map<String, dynamic> data) async {
+    print("INSERT LOC");
+    print(data);
     final database = await DBHelper.getDatabase();
     int id = await database.insert(tableName, data,
         conflictAlgorithm: ConflictAlgorithm.replace);

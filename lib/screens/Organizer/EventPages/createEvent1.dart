@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:eventy/databases/DBcategory.dart';
 import 'package:eventy/screens/Organizer/EventPages/createEvent2.dart';
 import 'package:eventy/widgets/fileInputWidget.dart';
 import 'package:eventy/widgets/personalizedButtonWidget.dart';
@@ -6,32 +7,53 @@ import 'package:eventy/widgets/circleStepRow.dart';
 import 'package:eventy/widgets/inputWidgets.dart';
 import 'package:eventy/widgets/appBar.dart';
 
-class CreateEvent1 extends StatelessWidget {
+class CreateEvent1 extends StatefulWidget {
+  @override
+  _CreateEvent1State createState() => _CreateEvent1State();
+}
+
+class _CreateEvent1State extends State<CreateEvent1> {
+  TextEditingController _eventNameController = TextEditingController();
+  TextEditingController _eventDescriptionController = TextEditingController();
+  String? _selectedEventType = '';
+  late Future<List<Map<String, dynamic>>> _categoriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoriesFuture = DBCategory.getAllCategories();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: const PageAppBar(title: "Create Event"),
-        body: SingleChildScrollView(
-          child: Center(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      appBar: const PageAppBar(title: "Create Event"),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               const SizedBox(height: 20),
               CircleStepRow(step: 1),
               const SizedBox(height: 35),
               Container(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                  child: const Text("Event details:",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: Color(0xFF4F4F4F),
-                      ))),
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                child: const Text(
+                  "Event details:",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Color(0xFF4F4F4F),
+                  ),
+                ),
+              ),
               Container(
                 padding: const EdgeInsets.fromLTRB(30, 24, 30, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    fullInput("Event name:", "Enter the event name"),
+                    fullInput("Event name:", "Enter the event name",
+                        _eventNameController),
                     const SizedBox(
                       height: 20,
                     ),
@@ -42,7 +64,22 @@ class CreateEvent1 extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    customDropdownInput(),
+                    FutureBuilder<List<Map<String, dynamic>>>(
+                      future: _categoriesFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return Text('No categories available');
+                        } else {
+                          return customDropdownInput(snapshot);
+                        }
+                      },
+                    ),
                     const SizedBox(
                       height: 20,
                     ),
@@ -56,7 +93,7 @@ class CreateEvent1 extends StatelessWidget {
                     const SizedBox(
                       height: 20,
                     ),
-                    descInput(),
+                    descInput(_eventDescriptionController),
                     const SizedBox(
                       height: 30,
                     ),
@@ -79,29 +116,57 @@ class CreateEvent1 extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         PersonalizedButtonWidget(
-                            context: context,
-                            buttonText: "Next",
-                            onClickListener: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => CreateEvent2(),
-                              ));
-                            }),
+                          context: context,
+                          buttonText: "Next",
+                          onClickListener: () {
+                            // Capture values from input fields
+                            String eventName = _eventNameController.text;
+                            String? eventType = _selectedEventType;
+                            String eventDescription =
+                                _eventDescriptionController.text;
+
+                            // Create the map
+                            Map<String, dynamic> createdEvent = {
+                              'eventName': eventName,
+                              'eventType': eventType,
+                              'eventDescription': eventDescription,
+                            };
+
+                            print(createdEvent);
+
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) =>
+                                  CreateEvent2(createdEvent: createdEvent),
+                            ));
+                          },
+                        ),
                       ],
                     )
                   ],
                 ),
               )
-            ]),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 
-  Widget customDropdownInput() {
+  Widget customDropdownInput(snapshot) {
+    List<Map<String, dynamic>> categories = snapshot.data!;
+    List<DropdownMenuItem<String>> dropdownItems =
+        categories.map<DropdownMenuItem<String>>((category) {
+      return DropdownMenuItem<String>(
+        value: category['name'] as String,
+        child: Text(category['name'] as String),
+      );
+    }).toList();
+
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Color(0xFFBDBDBD), // Set the bottom border color
+            color: Color(0xFFBDBDBD),
           ),
         ),
       ),
@@ -110,26 +175,19 @@ class CreateEvent1 extends StatelessWidget {
         children: [
           Expanded(
             child: DropdownButtonFormField(
-              items: const [
-                DropdownMenuItem(
-                  value: 'option1',
-                  child: Text('Option 1'),
-                ),
-                DropdownMenuItem(
-                  value: 'option2',
-                  child: Text('Option 2'),
-                ),
-                DropdownMenuItem(
-                  value: 'option3',
-                  child: Text('Option 3'),
-                ),
-              ],
-              onChanged: (value) {},
-              icon: const Icon(
-                Icons.arrow_drop_down, // Use a custom caret icon
-                color: Colors.transparent, // Set the caret color to transparent
+              items: dropdownItems,
+              onChanged: (value) {
+                // Handle the selected value
+                print('Selected value: $value');
+                setState(() {
+                  _selectedEventType = value;
+                });
+              },
+              icon: Icon(
+                Icons.arrow_drop_down,
+                color: Colors.transparent,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Select an option',
                 hintStyle: TextStyle(
                   fontWeight: FontWeight.normal,
@@ -139,17 +197,18 @@ class CreateEvent1 extends StatelessWidget {
               ),
             ),
           ),
-          const Icon(
+          Icon(
             Icons.keyboard_arrow_down,
-            color: Color(0xFFBDBDBD), // Set the color of the caret
+            color: Color(0xFFBDBDBD),
           ),
         ],
       ),
     );
   }
 
-  TextField customInput() {
-    return const TextField(
+  TextField customInput(TextEditingController inputController) {
+    return TextField(
+      controller: inputController,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.zero,
         hintText: '  Enter the event name',
@@ -165,10 +224,10 @@ class CreateEvent1 extends StatelessWidget {
     );
   }
 
-  TextField descInput() {
+  TextField descInput(TextEditingController inputController) {
     return TextField(
-      maxLines:
-          5, // Set the maximum number of lines to make it a multiline input
+      controller: inputController,
+      maxLines: 5,
       decoration: InputDecoration(
         hintText: 'Enter the description',
         hintStyle: const TextStyle(
@@ -177,8 +236,7 @@ class CreateEvent1 extends StatelessWidget {
         ),
         border: OutlineInputBorder(
           borderSide: const BorderSide(color: Color(0xFFBDBDBD)),
-          borderRadius:
-              BorderRadius.circular(8.0), // Adjust the border radius as needed
+          borderRadius: BorderRadius.circular(8.0),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Color(0xFFBDBDBD)),
@@ -188,8 +246,8 @@ class CreateEvent1 extends StatelessWidget {
           borderSide: const BorderSide(color: Color(0xFF662549)),
           borderRadius: BorderRadius.circular(8.0),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-            vertical: 12.0, horizontal: 16.0), // Adjust padding as needed
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
       ),
     );
   }
