@@ -46,7 +46,9 @@ class DBOrganizers
         $name = $data['name'];
         $photoPath = $data['photoPath'] ?? null;
         $roleId = $data['role_id'] ?? null;
-        $birthdate = $data['birthdate'] ?? null;
+        $role = $data['role'] ?? null;
+        $birthdate = date_create_from_format('Y-m-d', $data['birthdate']);
+        $birthdate = $birthdate !== false ? $birthdate->format('Y-m-d') : null;
         $location = $data['location'] ?? null;
         $phoneNumber = $data['phone_number'] ?? null;
         $email = $data['email'];
@@ -55,29 +57,31 @@ class DBOrganizers
         $verified = $data['verified'] ?? 0;
 
         // Update the organizer in the organizers table 
-        $sql = "UPDATE organizers 
-                SET name = '$name', 
-                    photo_path = '$photoPath', 
-                    role_id = '$roleId', 
-                    birthdate = '$birthdate', 
-                    location = '$location', 
-                    phone_number = '$phoneNumber', 
-                    email = '$email', 
-                    password_hash = '$passwordHash', 
-                    verification_num = '$verificationNum', 
-                    verified = '$verified'
-                WHERE id = '$organizerID'";
+        $sqlUpdate = "UPDATE organizers 
+              SET name = ?,
+                  photo_path = ?,
+                  role_id = ?,
+                  role = ?,
+                  birthdate = ?,
+                  location = ?,
+                  phone_number = ?,
+                  email = ?,
+                  password_hash = ?,
+                  verification_num = ?,
+                  verified = ?
+              WHERE id = ?";
 
-        // Execute the query
-        $this->db->query($sql);
+// Execute the query with prepared statements
+$this->db->query($sqlUpdate, $name, $photoPath, $roleId, $role, $birthdate, $location, $phoneNumber, $email, $passwordHash, $verificationNum, $verified, $organizerID);
+
 
         // Check for errors
         if ($this->db->affectedRows() > 0) {
             // Successful update
-            return ['success' => 'Organizer updated successfully'];
+            return true;
         } else {
             // Error during update
-            return ['error' => 'Failed to update organizer'];
+            return false;
         }
     }
 

@@ -33,7 +33,8 @@ class DBUsers
     }
 
     public function updateUser($userId, $name, $photoPath, $roleId, $birthdate, $location, $phoneNumber, $email, $passwordHash, $verificationNum, $verified)
-    {
+    {   $birthdate = date_create_from_format('Y-m-d', $birthdate);
+        $birthdate = $birthdate !== false ? $birthdate->format('Y-m-d') : null; 
         $query = "UPDATE users SET name=?, photo_path=?, role_id=?, birthdate=?, location=?, phone_number=?, email=?, password_hash=?, verification_num=?, verified=? WHERE id=?";
         $this->db->query($query, $name, $photoPath, $roleId, $birthdate, $location, $phoneNumber, $email, $passwordHash, $verificationNum, $verified, $userId);
 
