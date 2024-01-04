@@ -92,5 +92,41 @@ switch ($vars['action']) {
             }
         }
         break;
+        case "profile":{
+            $imgpath = $vars['img'];
+            $profile = $vars['profile'];
+            $user = $dbUsers->getUserByEmail($profile['email']);
+            if ($user !== null) {     
+                $birthdate = date_create_from_format('Y-m-d', $user['birth_date']);
+                $birthdate = $birthdate !== false ? $birthdate->format('Y-m-d') : null; 
+                $query = "UPDATE users SET name=?, photo_path=?,role=?, birthdate=?, location=?, phone_number=?, email=?, password_hash=?, verification_num=?, verified=? WHERE id=?";
+                $db->query($query,$profile['name'],$imgpath,$profile['role'],$birthdate,$profile['location'],
+                                              $profile['phone_number'],$profile['email'],$user['password_hash'],$user['verification_num'],$user['verified'],$user['id']);
+
+                $res = $db->affectedRows() > 0;
+                                              
+                if ($res) {
+                    echo json_encode(array("success" => "Updated successfully"));
+                } else {
+                    echo json_encode(array("error" => "Something went wrong"));
+                }
+            } else {
+                echo json_encode(array("error" => "User not found"));
+            }
+        }
+            break;
+        case "getUserInfo":{
+            $email = $vars['email'];
+            $user = $dbUsers->getUserByEmail($email);
+            if ($user) {
+                echo json_encode($user);
+                exit;
+            } else {
+                echo json_encode(array("error" => "User not found"));
+                exit;
+            }
+        }
+
 }
+              
 ?>

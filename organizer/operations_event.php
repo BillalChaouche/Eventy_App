@@ -31,6 +31,7 @@ switch ($data['action']) {
             $userId = $user[0]['id']; // Extract the user ID
             $items = $items = $db->query("SELECT events.*, categories.name AS category
             FROM events
+
             INNER JOIN categories ON events.category_id = categories.id WHERE events.organizer_id = ?", $userId)->fetchAll();
             echo json_encode($items);
             exit;
