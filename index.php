@@ -125,7 +125,24 @@ switch ($vars['action']) {
                 echo json_encode(array("error" => "User not found"));
                 exit;
             }
-        }
+        } break;
+        
+    case "get_user_topics": {
+                $email = $vars['userEmail'];
+                $user = $dbUsers->getUserByEmail($email);
+                $userId = $user['id'];
+                // Fetch user record from the database based on the email
+                $userEvents = selectUserEvents($userId);
+            
+                $topics = array();
+                foreach ($userEvents as $event) {
+                    $eventId = $event['id'];
+                    $topics[] = "event_$eventId";
+                }
+            
+                echo json_encode(array("topics" => $topics));
+            }
+            break;
 
 }
               
