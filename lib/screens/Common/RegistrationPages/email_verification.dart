@@ -80,10 +80,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                       // Call the function to send verification email with the code
                       if (response) {
                         // Continue with the navigation or any other action
-
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, '/', (route) => false);
-
+                        Navigator.pushNamed(context, '/SetupProfile');
                       } else {
                         // Show SnackBar for unsuccessful verification
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -94,7 +91,6 @@ class _EmailVerificationState extends State<EmailVerification> {
                           ),
                         );
                       }
-
                     }),
                 const SizedBox(
                   height: 30,

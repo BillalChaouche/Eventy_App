@@ -9,6 +9,8 @@ import 'dart:convert';
 
 import 'dart:async';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 Future<List<Map<String, dynamic>>?> endpoint_api_get(String url) async {
   try {
     final response = await Future.any([
@@ -187,17 +189,17 @@ Future<bool> verify_email(String code) async {
   List userData = await DBUserOrganizer.getUser();
   print('sending email to  ${userData[0]['email']}');
   String url = '${AppConfig.backendBaseUrl}verifyemail.php';
-  print(SharedData.instance.sharedVariable);
+  print(await SharedData.instance.getSharedVariable());
   var table_name;
   Map<String, dynamic> Info;
-  if (SharedData.instance.sharedVariable == "User") {
+  if (await SharedData.instance.getSharedVariable() == "User") {
     table_name = "users";
   } else {
     table_name = "organizers";
   }
 
   try {
-    print(SharedData.instance.sharedVariable);
+    print(await SharedData.instance.getSharedVariable());
     final response = await http.post(
       //Sending POST request to API endpoint
       Uri.parse(url),
@@ -261,6 +263,7 @@ Future<bool> verify_email(String code) async {
 
 Future<bool> userlogin(Map<String, dynamic> userData) async {
   String url = '${AppConfig.backendBaseUrl}index.php';
+  print("Going to send to :" + url);
 
   try {
     //Sending POST request to API endpoint
@@ -287,6 +290,7 @@ Future<bool> userlogin(Map<String, dynamic> userData) async {
           'email': userData['email'],
           'verified': 1,
         });
+
         print("the user logged in is of id : $id");
         return true;
         //additional logic for login success, maybe navigating to the home page
@@ -409,4 +413,107 @@ Future<Map<String, dynamic>> get_organizer_by_email(String useremail) async {
     print('Failed. Error: ${response.statusCode}');
   }
   return responseData['user'];
+}
+
+Future<bool> profileSetup(
+    Map<String, dynamic> userData, String imgurl, String urle) async {
+  String url = '${AppConfig.backendBaseUrl}$urle';
+
+  try {
+    // Convert userData to a JSON-serializable string
+
+    //Sending POST request to API endpoint
+    final response = await http.post(
+      Uri.parse(url),
+      body:
+          jsonEncode({'action': 'profile', 'profile': userData, 'img': imgurl}),
+    );
+    print(
+      jsonEncode({'action': 'profile', 'profile': userData, 'img': imgurl}),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+
+      if (responseData['error'] != null) {
+        // Handle the login error
+        print('error: ${responseData['error']}');
+        return false;
+      } else {
+        print('profile saved successfully');
+        ;
+        return true;
+        //additional logic for login success, maybe navigating to the home page
+      }
+    } else {
+      // Server error
+      print('Failed. Error: ${response.statusCode}');
+      return false;
+    }
+  } catch (e) {
+    // Handle exceptions
+    print('Exception profile setup: $e');
+    return false;
+  }
+}
+
+Future<Map<String, dynamic>?> endpoint_fetch_user_info(
+    String email, String urle) async {
+  print("inside the funct");
+  String url = '${AppConfig.backendBaseUrl}$urle';
+  try {
+    final response = await http.post(
+      Uri.parse(url),
+      body: jsonEncode({
+        'action': 'getUserInfo',
+        'email': email,
+      }),
+    );
+
+    print("requested the funct  " + response.statusCode.toInt().toString());
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> ret = jsonDecode(response.body);
+      return ret;
+    }
+  } catch (error) {
+    print("Error: ${error.toString()}");
+    return null;
+  }
+  return null;
+}
+
+Future<List<String>?> endpoint_getUserTopics(String userEmail) async {
+  String url = '${AppConfig.backendBaseUrl}index.php';
+
+  try {
+    final response = await http.post(
+      Uri.parse(url),
+      body: jsonEncode({
+        'action': 'get_user_topics',
+        'userEmail': userEmail,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+
+      if (responseData['error'] != null) {
+        // Handle the error
+        print('Error fetching user topics: ${responseData['error']}');
+        return null;
+      } else {
+        List<String> topics = List<String>.from(responseData['topics']);
+        return topics;
+      }
+    } else {
+      // Server error
+      print('Failed. Error: ${response.statusCode}');
+      return null;
+    }
+  } catch (e) {
+    // Handle exceptions
+    print('Exception during getUserTopics: $e');
+    return null;
+  }
 }

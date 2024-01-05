@@ -28,8 +28,10 @@ Widget eventWidget({
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15.0),
               image: DecorationImage(
-                image: CachedNetworkImageProvider(
-                    AppConfig.backendBaseUrlImg + event.imgPath),
+                image: (event.imgPath[0] == 'h')
+                    ? CachedNetworkImageProvider(event.imgPath)
+                    : CachedNetworkImageProvider(
+                        AppConfig.backendBaseUrlImg + event.imgPath),
                 fit: BoxFit.cover,
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:eventy/databases/DBevent.dart';
 import 'package:eventy/models/EventEntity.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -93,7 +94,9 @@ class EventProvider extends ChangeNotifier {
           map['booked'] as int, // Default value for booked if null
           map['accepted'] as int,
           map['organizer'] as String,
-          [map['category'] as String] // Convert category to a list
+          [map['category'] as String],
+          map['remote_id'] as int
+          // Convert category to a list
           );
     }).toList();
   }
@@ -177,11 +180,23 @@ class EventProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //Here we will subscribe to event topic
   Future<void> toggleEventBookedState(int id) async {
     await DBEvent.updateSpecific(id, 'booked');
     await DBEvent.uploadModification();
     EventEntity foundEvent = events.firstWhere((event) => event.id == id);
     foundEvent.toggleBooked();
+    //subscribe to event topic to recieve notifications
+    await FirebaseMessaging.instance
+        .subscribeToTopic("event_${foundEvent.remote_id}");
     notifyListeners();
+  }
+
+  int bookedEvent() {
+    return events.where((event) => event.booked == 1).length;
+  }
+
+  int acceptedEvent() {
+    return events.where((event) => event.accepted == 1).length;
   }
 }

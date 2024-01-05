@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:eventy/EndPoints/endpoints.dart';
+import 'package:eventy/models/SharedData.dart';
 import 'package:sqflite/sqflite.dart';
 import 'DBHelper.dart';
 
@@ -11,11 +13,12 @@ class DBUserOrganizer {
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              name TEXT,
               role TEXT,
+              imgPath TEXT,
               birth_date TEXT,
               location TEXT,
               phone_number TEXT,
               email TEXT,
-              verified
+              verified INTEGER,
               flag INTEGER,
              create_date TEXT
            )
@@ -25,10 +28,16 @@ class DBUserOrganizer {
     final database = await DBHelper.getDatabase();
 
     return database.rawQuery('''SELECT 
-            id,
+            id ,
             name,
-            email,
-            verified
+            role ,
+            imgPath,
+            birth_date ,
+            location ,
+            phone_number ,
+            email ,
+            verified,
+            flag
           FROM ${tableName}
           order by id DESC
           ''');
@@ -41,6 +50,7 @@ class DBUserOrganizer {
             id ,
             name,
             role ,
+            imgPath,
             birth_date ,
             location ,
             phone_number ,
@@ -91,6 +101,18 @@ class DBUserOrganizer {
           ''');
   }
 
+  static Future<bool> uploadModification(String img) async {
+    List<Map<String, dynamic>> profile = await getUsersToUpload();
+    bool res = false;
+    if (await SharedData.instance.getSharedVariable() == "User") {
+      res = await profileSetup(profile[0], img, 'index.php');
+    } else {
+      res =
+          await profileSetup(profile[0], img, 'organizer/login_signup_org.php');
+    }
+    return res;
+  }
+
   static Future<int> getAllCount() async {
     final database = await DBHelper.getDatabase();
 
@@ -101,26 +123,29 @@ class DBUserOrganizer {
     return res[0]['cc'] ?? 0;
   }
 
-  static Future<bool> syncUsers(List<Map<String, dynamic>> remote_data) async {
+  static Future<bool> syncUsers(Map<String, dynamic> remote_data) async {
+    // Delete all existing local users
     List local_data = await getAllUsers();
-    Map index_remote = {};
     List local_ids = [];
     for (Map item in local_data) {
-      index_remote[item['remote_id']] = item['id'];
       local_ids.add(item['id']);
     }
 
-    for (Map item in remote_data) {
-      if (index_remote.containsKey(item['id'])) {
-        int local_id = index_remote[item['id']];
-        await updateUser(local_id, {'name': item['name']});
-        local_ids.remove(local_id);
-      } else {
-        await insertUser({'name': item['name'], 'remote_id': item['id']});
-      }
+    for (int local_id in local_ids) {
+      await deleteUser(local_id);
     }
 
-    for (int local_id in local_ids) await deleteUser(local_id);
+    await insertUser({
+      'name': remote_data['name'],
+      'role': remote_data['role'],
+      'imgPath': remote_data['photo_path'],
+      'birth_date': remote_data['birthdate'],
+      'location': remote_data['location'],
+      'phone_number': remote_data['phone_number'],
+      'email': remote_data['email'],
+      'verified': remote_data['verified']
+    });
+
     return true;
   }
 
@@ -153,6 +178,27 @@ class DBUserOrganizer {
     });
 
     return true;
+  }
+
+  static Future<bool> service_sync_user() async {
+    print("Running Cron Service to get User");
+    List<Map<String, dynamic>> user = await DBUserOrganizer.getUser();
+    String email = user[0]['email'];
+    Map<String, dynamic>? remote_data;
+    if (await SharedData.instance.getSharedVariable() == "User") {
+      remote_data = await endpoint_fetch_user_info(email, 'index.php');
+      print('hi');
+      print(remote_data);
+    } else {
+      remote_data = await endpoint_fetch_user_info(
+          email, 'organizer/login_signup_org.php');
+    }
+
+    if (remote_data != null) {
+      await DBUserOrganizer.syncUsers(remote_data);
+      return true;
+    }
+    return false;
   }
 
   static Future<int> insertUser(Map<String, dynamic> data) async {

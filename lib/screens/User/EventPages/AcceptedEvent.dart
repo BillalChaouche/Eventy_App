@@ -48,7 +48,7 @@ class _AcceptedEventState extends State<AcceptedEvent> {
                 decoration: BoxDecoration(
                   // Optional: Add border radius
                   image: DecorationImage(
-                    image: NetworkImage(AppConfig.backendBaseUrlImg +
+                    image: NetworkImage(
                         event.imgPath), // Replace with your image path
                     fit: BoxFit.cover,
                   ),

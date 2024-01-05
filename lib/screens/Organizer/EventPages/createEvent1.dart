@@ -1,3 +1,9 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:eventy/databases/DBcategory.dart';
 import 'package:eventy/screens/Organizer/EventPages/createEvent2.dart';
@@ -6,6 +12,8 @@ import 'package:eventy/widgets/personalizedButtonWidget.dart';
 import 'package:eventy/widgets/circleStepRow.dart';
 import 'package:eventy/widgets/inputWidgets.dart';
 import 'package:eventy/widgets/appBar.dart';
+
+typedef FunctionallityButton = void Function(String? value);
 
 class CreateEvent1 extends StatefulWidget {
   @override
@@ -17,6 +25,8 @@ class _CreateEvent1State extends State<CreateEvent1> {
   TextEditingController _eventDescriptionController = TextEditingController();
   String? _selectedEventType = '';
   late Future<List<Map<String, dynamic>>> _categoriesFuture;
+  String imgURL = "";
+  late Uint8List uint8List;
 
   @override
   void initState() {
@@ -109,7 +119,11 @@ class _CreateEvent1State extends State<CreateEvent1> {
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [FileInputWidget()],
+                      children: [
+                        FileInputWidget(
+                          onImageSelected: handleImageSelected,
+                        )
+                      ],
                     ),
                     const SizedBox(height: 35),
                     Row(
@@ -118,8 +132,10 @@ class _CreateEvent1State extends State<CreateEvent1> {
                         PersonalizedButtonWidget(
                           context: context,
                           buttonText: "Next",
-                          onClickListener: () {
+                          onClickListener: () async {
                             // Capture values from input fields
+                            String imageURL =
+                                await uploadImageToFirebaseStorage(uint8List);
                             String eventName = _eventNameController.text;
                             String? eventType = _selectedEventType;
                             String eventDescription =
@@ -130,6 +146,7 @@ class _CreateEvent1State extends State<CreateEvent1> {
                               'eventName': eventName,
                               'eventType': eventType,
                               'eventDescription': eventDescription,
+                              'imagePath': imageURL,
                             };
 
                             print(createdEvent);
@@ -250,5 +267,49 @@ class _CreateEvent1State extends State<CreateEvent1> {
             const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
       ),
     );
+  }
+
+  void handleImageSelected(String? imagePath) async {
+    if (imagePath != null) {
+      File imageFile = File(imagePath);
+
+      if (await imageFile.exists()) {
+        List<int> imageBytes = await imageFile.readAsBytes();
+
+        // Upload image to Firebase Storage
+        uint8List = Uint8List.fromList(imageBytes);
+        uint8List = await reduceImageQuality(uint8List);
+      }
+    }
+  }
+
+  Future<Uint8List> reduceImageQuality(List<int> imageBytes) async {
+    img.Image? originalImage = img.decodeImage(Uint8List.fromList(imageBytes));
+    if (originalImage != null) {
+      // Reduce the image quality by encoding it with a lower quality
+      Uint8List reducedQualityBytes = Uint8List.fromList(img.encodeJpg(
+          originalImage,
+          quality: 50)); // Adjust the quality as needed
+
+      return reducedQualityBytes;
+    } else {
+      throw Exception('Failed to decode the image');
+    }
+  }
+
+  Future<String> uploadImageToFirebaseStorage(Uint8List imageBytes) async {
+    String imageName =
+        'event_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child('event_images')
+        .child(imageName);
+
+    firebase_storage.UploadTask uploadTask = ref.putData(imageBytes);
+
+    await uploadTask;
+    String downloadURL = await ref.getDownloadURL();
+
+    return downloadURL;
   }
 }

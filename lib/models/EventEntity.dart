@@ -14,6 +14,7 @@ class EventEntity {
   late int accepted;
   late String organizer;
   late List categories;
+  late int remote_id;
 
   EventEntity(
       this.id,
@@ -28,7 +29,8 @@ class EventEntity {
       this.booked,
       this.accepted,
       this.organizer,
-      this.categories);
+      this.categories,
+      this.remote_id);
 
   void toggleSaved() {
     saved = (saved == 0) ? 1 : 0;

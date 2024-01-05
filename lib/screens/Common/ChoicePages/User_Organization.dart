@@ -47,8 +47,8 @@ class _UserOragnizationState extends State<UserOragnization> {
                           100), // Add some spacing between checkbox and button
                   buildbutton(
                       text: 'User',
-                      functionallityButton: () {
-                        SharedData.instance.sharedVariable = "User";
+                      functionallityButton: () async {
+                        await SharedData.instance.saveSharedVariable('User');
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => SignUpUser()),
@@ -58,8 +58,8 @@ class _UserOragnizationState extends State<UserOragnization> {
                     height: 100,
                   ),
                   ElevatedButton(
-                    onPressed: () {
-                      SharedData.instance.sharedVariable = "Organizer";
+                    onPressed: () async {
+                      await SharedData.instance.saveSharedVariable('Organizer');
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => SignUpUser()),

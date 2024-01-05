@@ -1,9 +1,11 @@
 import 'package:eventy/EndPoints/endpoints.dart';
+import 'package:eventy/firebase.dart';
 import 'package:eventy/models/SharedData.dart';
 import 'package:eventy/screens/Common/ChoicePages/User_Organization.dart';
 import 'package:eventy/widgets/buildbutton_function.dart';
 import 'package:eventy/widgets/buildemail_function.dart';
 import 'package:eventy/widgets/buildpassword_function.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -111,16 +113,26 @@ class _LoginState extends State<Login> {
                         var userresponse = await userlogin(userData);
                         var organizerresponse = await organizerlogin(userData);
                         if (userresponse) {
-                          SharedData.instance.sharedVariable = 'User';
+                          await SharedData.instance.saveSharedVariable('User');
+                          await my_messaging_init_app();
 
+                          List<String>? topics =
+                              await endpoint_getUserTopics(userData['email']);
+
+                          print(topics);
+                          if (topics != null) {
+                            subscribeUserToHisTopics(topics);
+                            print("User subscribed succefully to his topics");
+                          }
                           Navigator.pushNamedAndRemoveUntil(
                               context, '/', (route) => false);
                         } else if (organizerresponse) {
-                          SharedData.instance.sharedVariable = 'Organizer';
+                          await SharedData.instance
+                              .saveSharedVariable('Organizer');
+                          await my_messaging_init_app();
                           Navigator.pushNamedAndRemoveUntil(
                               context, '/', (route) => false);
                         } else {
-
                           // Show SnackBar for unsuccessful login
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -169,5 +181,11 @@ class _LoginState extends State<Login> {
         ],
       ),
     ));
+  }
+
+  Future<void> subscribeUserToHisTopics(List<String> topics) async {
+    for (String topic in topics) {
+      await FirebaseMessaging.instance.subscribeToTopic(topic);
+    }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:eventy/Components/PageAppBar.dart';
 import 'package:eventy/databases/DBHelper.dart';
+import 'package:eventy/databases/DBUserOrganizer.dart';
 import 'package:eventy/models/setting.dart';
 import 'package:eventy/widgets/avatar.dart';
 import 'package:eventy/widgets/profileWidget.dart';
@@ -15,7 +16,19 @@ class SettingsOrganizerScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsOrganizerScreen> {
+  late Future<List<Map<String, dynamic>>> _user;
+  Future<List<Map<String, dynamic>>> fetchUserInfo() async {
+    await DBUserOrganizer.service_sync_user();
+    return await DBUserOrganizer.getAllUsers();
+  }
+
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _user = fetchUserInfo();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar:
@@ -30,8 +43,25 @@ class _SettingsScreenState extends State<SettingsOrganizerScreen> {
               SizedBox(
                 height: 10,
               ),
-              profileWidget(
-                  100, 100, "assets/images/profile.jpg", false, () {}),
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: _user,
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container();
+                  } else if (snapshot.hasError) {
+                    return Text('Error fetching user data');
+                  } else {
+                    List<Map<String, dynamic>> userData = snapshot.data ?? [];
+                    if (userData.isNotEmpty && userData[0]['imgPath'] != null) {
+                      return profileWidget(
+                          100, 100, userData[0]['imgPath'], true, () {});
+                    } else {
+                      return Text('No profile image found');
+                    }
+                  }
+                },
+              ),
               SizedBox(
                 height: 60,
               ),
@@ -48,15 +78,10 @@ class _SettingsScreenState extends State<SettingsOrganizerScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-
                     color: Colors.red,
                     width: 2.0,
                   ),
- 
-                  ),
-
-
-                
+                ),
                 child: GestureDetector(
                   onTap: () {
                     // Handle logout
@@ -64,9 +89,6 @@ class _SettingsScreenState extends State<SettingsOrganizerScreen> {
 
                     Navigator.pushNamedAndRemoveUntil(
                         context, '/login', (route) => false);
-
-                    
-
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

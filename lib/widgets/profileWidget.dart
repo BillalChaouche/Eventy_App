@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:eventy/Static/AppConfig.dart';
 import 'package:eventy/widgets/blurButton.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +33,7 @@ Widget profileWidget(double width, double height, String imageSrc, bool shadow,
             functionallityButton();
           },
           child: Ink.image(
-            image: AssetImage(imageSrc), // Your image path
+            image: CachedNetworkImageProvider(imageSrc), // Your image path
             fit: BoxFit.cover, // Image fit inside the button
           ),
         ),

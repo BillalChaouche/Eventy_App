@@ -76,7 +76,7 @@ class _SignUpUserState extends State<SignUpUser> {
                           30), // Add some spacing between checkbox and button
                   buildbutton(
                     text: 'SignUp',
-                    functionallityButton: () {
+                    functionallityButton: () async {
                       if (_formKey.currentState!.validate()) {
                         // Form is valid, process the data
                         String enteredEmail = _emailController.text;
@@ -87,13 +87,14 @@ class _SignUpUserState extends State<SignUpUser> {
                         print("Entered Email: $enteredEmail");
                         print("Entered Password: $enteredPassword");
                         print(
-                            "sign up as: ${SharedData.instance.sharedVariable}");
+                            "sign up as: ${await SharedData.instance.getSharedVariable()}");
                         Map<String, dynamic> userData = {
                           'name': enteredUsername,
                           'email': enteredEmail,
                           'password': enteredPassword,
                         };
-                        if (SharedData.instance.sharedVariable == "User") {
+                        if (await SharedData.instance.getSharedVariable() ==
+                            "User") {
                           userSignup(userData);
                         } else {
                           organizerSignup(userData);

@@ -1,13 +1,31 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 class SharedData {
-  // Private constructor
   SharedData._privateConstructor();
 
-  // Singleton instance
   static final SharedData _instance = SharedData._privateConstructor();
 
-  // Getter to access the instance
   static SharedData get instance => _instance;
 
-  // Your shared variable
-  String sharedVariable = 'Organizer';
+  Future<void> saveSharedVariable(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('sharedVariable', value);
+  }
+
+  Future<String?> getSharedVariable() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('sharedVariable');
+  }
+
+  // Save the current user token
+  Future<void> saveUserToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userToken', token);
+  }
+
+  // Retrieve the current user token
+  Future<String?> getUserToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userToken');
+  }
 }

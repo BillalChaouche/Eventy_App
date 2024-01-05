@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:cron/cron.dart';
 import 'package:eventy/Providers/EventProvider.dart';
+import 'package:eventy/databases/DBUserOrganizer.dart';
 import 'package:eventy/databases/DBeventOrg.dart';
 import 'package:eventy/screens/Organizer/EventPages/Event.dart';
 import 'package:eventy/screens/Organizer/NotificationsPages/NotificationsPage.dart';
@@ -24,6 +26,7 @@ class HomeOrganizer extends StatefulWidget {
 class _Home extends State<HomeOrganizer> {
   bool _isLoading = true;
   late Timer _timer;
+  late Future<List<Map<String, dynamic>>> _user;
   late RefreshController _refreshController;
   final ScrollController _scrollController = ScrollController();
   bool showText = false; // Default text for the AppBar
@@ -56,16 +59,18 @@ class _Home extends State<HomeOrganizer> {
           0,
           0,
           '',
-          [map['category'] as String] // Convert category to a list
-          );
+          [map['category'] as String], // Convert category to a list
+          map['remote_id'] as int);
     }).toList();
   }
 
   @override
   void initState() {
     super.initState();
+
     _scrollController.addListener(_onScroll);
     showText = false;
+    _user = fetchUserInfo();
     heightAppBar = 0;
     _refreshController = RefreshController(initialRefresh: false);
   }
@@ -73,6 +78,7 @@ class _Home extends State<HomeOrganizer> {
   void _onRefresh() async {
     try {
       bool syncResultE = await DBEventOrg.service_sync_events();
+      _user = fetchUserInfo();
 
       if (!syncResultE) {
         _refreshController.refreshFailed();
@@ -104,6 +110,11 @@ class _Home extends State<HomeOrganizer> {
         });
       }
     });
+  }
+
+  Future<List<Map<String, dynamic>>> fetchUserInfo() async {
+    await DBUserOrganizer.service_sync_user();
+    return await DBUserOrganizer.getAllUsers();
   }
 
   void _onScroll() {
@@ -210,8 +221,33 @@ class _Home extends State<HomeOrganizer> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        profileWidget(47, 47, 'assets/images/OrgProfile.jpg',
-                            true, NavigateToProfilePage),
+                        FutureBuilder<List<Map<String, dynamic>>>(
+                          future: _user,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<List<Map<String, dynamic>>>
+                                  snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Container();
+                            } else if (snapshot.hasError) {
+                              return Text('Error fetching user data');
+                            } else {
+                              List<Map<String, dynamic>> userData =
+                                  snapshot.data ?? [];
+                              if (userData.isNotEmpty &&
+                                  userData[0]['imgPath'] != null) {
+                                return profileWidget(
+                                    47,
+                                    47,
+                                    userData[0]['imgPath'],
+                                    true,
+                                    NavigateToProfilePage);
+                              } else {
+                                return Text('No profile image found');
+                              }
+                            }
+                          },
+                        ),
                         circleIconWidget(47, 47, Ionicons.notifications_outline,
                             () {
                           Navigator.push(

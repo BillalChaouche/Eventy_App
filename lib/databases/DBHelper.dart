@@ -38,7 +38,6 @@ class DBHelper {
           database.execute('DROP TABLE IF EXISTS categories');
           database.execute('DROP TABLE IF EXISTS EventsOrg');
 
-
           for (var sql_code in sql_create_code) database.execute(sql_code);
         }
       },
@@ -59,7 +58,6 @@ class DBHelper {
     print("drop table categories");
     await db.execute('DROP TABLE IF EXISTS EventsOrg');
     print("drop table EventsOrg");
-
 
     // Recreate the tables
     List<String> sql_create_code = [

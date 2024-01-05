@@ -1,12 +1,16 @@
-import 'package:eventy/databases/DBcategory.dart';
-import 'package:eventy/databases/DBeventOrg.dart';
-import 'package:eventy/screens/Organizer/HomePages/Home.dart';
-import 'package:flutter/material.dart';
-import 'package:eventy/widgets/fileInputWidget.dart';
-import 'package:eventy/widgets/personalizedButtonWidget.dart';
-import 'package:eventy/widgets/inputWidgets.dart';
-import 'package:eventy/models/EventEntity.dart';
+import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:eventy/databases/DBcategory.dart';
+import 'package:eventy/databases/DBeventOrg.dart';
+import 'package:eventy/screens/Organizer/HomePages/Home.dart';
+import 'package:flutter/material.dart';
+import 'package:eventy/widgets/fileInputWidget.dart';
+import 'package:eventy/widgets/personalizedButtonWidget.dart';
+import 'package:eventy/widgets/inputWidgets.dart';
+import 'package:eventy/models/EventEntity.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:eventy/databases/DBcategory.dart';
 import 'package:eventy/databases/DBeventOrg.dart';
@@ -15,6 +19,7 @@ import 'package:eventy/screens/Organizer/HomePages/Home.dart';
 import 'package:eventy/widgets/fileInputWidget.dart';
 import 'package:eventy/widgets/personalizedButtonWidget.dart';
 import 'package:eventy/widgets/inputWidgets.dart';
+import 'package:image/image.dart' as img;
 
 class EditEvent extends StatefulWidget {
   final int eventId;
@@ -34,6 +39,8 @@ class _EditEventState extends State<EditEvent> {
   String? selectedEventType = '';
   late EventEntity event;
   late Future<List<Map<String, dynamic>>> _categoriesFuture;
+  String imgURL = "";
+  Uint8List uint8List = Uint8List.fromList([0]);
 
   @override
   void initState() {
@@ -124,7 +131,9 @@ class _EditEventState extends State<EditEvent> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        FileInputWidget(DEF_IMG_PATH: event.imgPath),
+                        FileInputWidget(
+                            DEF_IMG_PATH: event.imgPath,
+                            onImageSelected: handleImageSelected),
                       ],
                     ),
                     const SizedBox(height: 35),
@@ -140,13 +149,29 @@ class _EditEventState extends State<EditEvent> {
                             String eventDescription = eventDescController.text;
 
                             // Update the record in the database
-                            var res =
-                                await DBEventOrg.updateRecord(widget.eventId, {
-                              'title': eventName,
-                              'description': eventDescription,
-                              'category': selectedEventType,
-                              'flag': 1
-                            });
+                            var res = false;
+                            if (uint8List == Uint8List.fromList([0])) {
+                              res = await DBEventOrg.updateRecord(
+                                  widget.eventId, {
+                                'title': eventName,
+                                'description': eventDescription,
+                                'category': selectedEventType,
+                                'flag': 1
+                              });
+                            } else {
+                              String imageURL =
+                                  await uploadImageToFirebaseStorage(uint8List);
+
+                              res = await DBEventOrg.updateRecord(
+                                  widget.eventId, {
+                                'title': eventName,
+                                'description': eventDescription,
+                                'category': selectedEventType,
+                                'imagePath': imageURL,
+                                'flag': 1
+                              });
+                            }
+                            await DBEventOrg.uploadModification();
 
                             if (res) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -270,5 +295,49 @@ class _EditEventState extends State<EditEvent> {
             const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
       ),
     );
+  }
+
+  void handleImageSelected(String? imagePath) async {
+    if (imagePath != null) {
+      File imageFile = File(imagePath);
+
+      if (await imageFile.exists()) {
+        List<int> imageBytes = await imageFile.readAsBytes();
+
+        // Upload image to Firebase Storage
+        uint8List = Uint8List.fromList(imageBytes);
+        uint8List = await reduceImageQuality(uint8List);
+      }
+    }
+  }
+
+  Future<Uint8List> reduceImageQuality(List<int> imageBytes) async {
+    img.Image? originalImage = img.decodeImage(Uint8List.fromList(imageBytes));
+    if (originalImage != null) {
+      // Reduce the image quality by encoding it with a lower quality
+      Uint8List reducedQualityBytes = Uint8List.fromList(img.encodeJpg(
+          originalImage,
+          quality: 50)); // Adjust the quality as needed
+
+      return reducedQualityBytes;
+    } else {
+      throw Exception('Failed to decode the image');
+    }
+  }
+
+  Future<String> uploadImageToFirebaseStorage(Uint8List imageBytes) async {
+    String imageName =
+        'event_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child('event_images')
+        .child(imageName);
+
+    firebase_storage.UploadTask uploadTask = ref.putData(imageBytes);
+
+    await uploadTask;
+    String downloadURL = await ref.getDownloadURL();
+
+    return downloadURL;
   }
 }

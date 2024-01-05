@@ -7,8 +7,9 @@ import 'package:file_picker/file_picker.dart';
 
 class FileInputWidget extends StatefulWidget {
   final String? DEF_IMG_PATH;
+  final Function(String?)? onImageSelected;
 
-  FileInputWidget({this.DEF_IMG_PATH});
+  FileInputWidget({this.DEF_IMG_PATH, this.onImageSelected});
 
   @override
   _FileInputWidgetState createState() => _FileInputWidgetState();
@@ -26,6 +27,10 @@ class _FileInputWidgetState extends State<FileInputWidget> {
         fileName = result.files.single.name;
         userUploadedImagePath = result.files.single.path;
       });
+      // Pass the selected image path to the parent widget using the callback
+      if (widget.onImageSelected != null) {
+        widget.onImageSelected!(userUploadedImagePath);
+      }
     }
   }
 
@@ -48,8 +53,7 @@ class _FileInputWidgetState extends State<FileInputWidget> {
                 )
               : widget.DEF_IMG_PATH != null
                   ? DecorationImage(
-                      image: CachedNetworkImageProvider(
-                          AppConfig.backendBaseUrlImg + widget.DEF_IMG_PATH!),
+                      image: CachedNetworkImageProvider(widget.DEF_IMG_PATH!),
                       fit: BoxFit.cover,
                     )
                   : null,

@@ -61,9 +61,11 @@ class _EventState extends State<Event> {
                 decoration: BoxDecoration(
                   // Optional: Add border radius
                   image: DecorationImage(
-                    image: CachedNetworkImageProvider(
-                        AppConfig.backendBaseUrlImg +
-                            event.imgPath), // Replace with your image path
+                    image: (event.imgPath[0] == 'h')
+                        ? CachedNetworkImageProvider(event.imgPath)
+                        : CachedNetworkImageProvider(
+                            AppConfig.backendBaseUrlImg +
+                                event.imgPath), // Replace with your image path
                     fit: BoxFit.cover,
                   ),
                 ),

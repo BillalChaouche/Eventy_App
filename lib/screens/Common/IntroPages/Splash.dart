@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:eventy/RootPage.dart';
 import 'package:eventy/databases/DBUserOrganizer.dart';
+import 'package:eventy/firebase.dart';
 import 'package:eventy/screens/Common/IntroPages/OnBording1.dart';
 import 'package:eventy/screens/Common/RegistrationPages/email_verification.dart';
 import 'package:eventy/screens/User/HomePages/Home.dart';
@@ -27,6 +28,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
         print(userData[0]);
         if (userData[0]['verified'] == 1) {
           print("this user is verified");
+          await my_messaging_init_app();
           Navigator.pushNamed(context, '/');
         } else {
           print("this user is not verified");

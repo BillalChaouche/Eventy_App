@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:eventy/RootPage.dart';
 import 'package:eventy/Providers/EventProvider.dart';
+import 'package:eventy/databases/DBUserOrganizer.dart';
 import 'package:eventy/databases/DBcategory.dart';
 import 'package:eventy/databases/DBevent.dart';
 import 'package:eventy/screens/User/CategoryPages/Categories.dart';
@@ -29,6 +30,7 @@ class Home extends StatefulWidget {
 class _Home extends State<Home> {
   final ScrollController _scrollController = ScrollController();
   late Future<List<Map<String, dynamic>>> _fetchCategories;
+  late Future<List<Map<String, dynamic>>> _user;
   bool showText = false; // Default text for the AppBar
   double heightAppBar = 0;
   bool _isLoading = true;
@@ -51,6 +53,7 @@ class _Home extends State<Home> {
     showText = false;
     heightAppBar = 0;
     _fetchCategories = fetchingCategories();
+    _user = fetchUserInfo();
     _startLoading();
     Provider.of<EventProvider>(context, listen: false).getEvents();
     _refreshController = RefreshController(initialRefresh: false);
@@ -65,6 +68,8 @@ class _Home extends State<Home> {
         _refreshController.refreshFailed();
       }
       await DBCategory.service_sync_categories();
+      _user = fetchUserInfo();
+      print(_user);
       _fetchCategories = fetchingCategories();
       await Provider.of<EventProvider>(context, listen: false).emptyEvents();
       await Provider.of<EventProvider>(context, listen: false).getEvents();
@@ -87,6 +92,11 @@ class _Home extends State<Home> {
       _refreshController.loadComplete();
       setState(() {});
     } catch (e) {}
+  }
+
+  Future<List<Map<String, dynamic>>> fetchUserInfo() async {
+    await DBUserOrganizer.service_sync_user();
+    return await DBUserOrganizer.getAllUsers();
   }
 
   Future<List<Map<String, dynamic>>> fetchingCategories() async {
@@ -222,8 +232,33 @@ class _Home extends State<Home> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        profileWidget(47, 47, 'assets/images/profile.jpg', true,
-                            NavigateToProfilePage),
+                        FutureBuilder<List<Map<String, dynamic>>>(
+                          future: _user,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<List<Map<String, dynamic>>>
+                                  snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Container();
+                            } else if (snapshot.hasError) {
+                              return Text('Error fetching user data');
+                            } else {
+                              List<Map<String, dynamic>> userData =
+                                  snapshot.data ?? [];
+                              if (userData.isNotEmpty &&
+                                  userData[0]['imgPath'] != null) {
+                                return profileWidget(
+                                    47,
+                                    47,
+                                    userData[0]['imgPath'],
+                                    true,
+                                    NavigateToProfilePage);
+                              } else {
+                                return Text('No profile image found');
+                              }
+                            }
+                          },
+                        ),
                         circleIconWidget(47, 47, Ionicons.notifications_outline,
                             () {
                           Navigator.pushNamed(context, '/Notifications');
