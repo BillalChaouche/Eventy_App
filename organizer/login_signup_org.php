@@ -70,5 +70,20 @@ switch ($vars['action']) {
             }
         }
         break;
+        case "get_organizer_by_email": {
+            $email = $vars['email'];
+
+            // Fetch user record from the database based on the email
+            $user = $dbOrganizers->getOrganizerByEmail($email);
+
+            if ($user !== null) {
+              echo json_encode(array("user" => $user));
+
+            } else {
+                // User not found
+                echo json_encode(array("error" => "User not found"));
+            }
+        }
+        break;
 }
 ?>
