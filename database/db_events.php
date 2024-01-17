@@ -29,7 +29,8 @@ function insertEvent($data)
     // Check for errors
     if ($db->affectedRows() > 0) {
         // Successful insertion
-        return ['success' => 'Event inserted successfully'];
+    $lastInsertedId = $db->lastInsertId();
+        return ['success' => 'Event inserted successfully', 'event_id' => $lastInsertedId];
     } else {
         // Error during insertion
         return ['error' => 'Failed to insert event'];

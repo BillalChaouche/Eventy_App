@@ -129,6 +129,24 @@ switch ($vars['action']) {
                     exit;
                 }
             }
+            case "getNotifications":
+                $email = $vars['email'];
+                $organizer = $dbOrganizers->getOrganizerByEmail($email);
+                if ($organizer) {
+                    $organizerId = $organizer['id'];
+                    $query = "SELECT title, body FROM organizers_notifications 
+                    WHERE organizer_id = ?";
+          
+                    $notifications = $db->query($query, $organizerId)->fetchAll();
+      
+                    echo json_encode( $notifications);
+      
+                    exit;
+                } else {
+                    echo json_encode(array("error" => "User not found"));
+                    exit;
+                }
+                
     
 }
 ?>
