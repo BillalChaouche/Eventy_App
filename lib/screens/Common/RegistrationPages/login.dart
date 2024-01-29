@@ -1,9 +1,12 @@
 import 'package:eventy/EndPoints/endpoints.dart';
+import 'package:eventy/firebase.dart';
 import 'package:eventy/models/SharedData.dart';
 import 'package:eventy/screens/Common/ChoicePages/User_Organization.dart';
+import 'package:eventy/screens/Common/RegistrationPages/forgot_password.dart';
 import 'package:eventy/widgets/buildbutton_function.dart';
 import 'package:eventy/widgets/buildemail_function.dart';
 import 'package:eventy/widgets/buildpassword_function.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -17,6 +20,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     var rememberPassword = false;
@@ -83,6 +87,13 @@ class _LoginState extends State<Login> {
                           ],
                         ),
                         GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ForgotPassword()));
+                          },
                           child: const Text(
                             'Forget password?',
                             style: TextStyle(
@@ -93,44 +104,68 @@ class _LoginState extends State<Login> {
                       ],
                     ),
                   ),
-                  const SizedBox(
-                      height:
-                          16), // Add some spacing between checkbox and button
-                  buildbutton(
-                      text: 'Login',
-                      functionallityButton: () async {
-                        String enteredEmail = _emailController.text;
-                        String enteredPassword = _passwordController.text;
+                  const SizedBox(height: 16),
+                  isLoading
+                      ? const CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Color(0xFF662549)),
+                          strokeWidth: 2,
+                        )
+                      : buildbutton(
+                          text: 'Login',
+                          functionallityButton: () async {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            String enteredEmail = _emailController.text;
+                            String enteredPassword = _passwordController.text;
 
-                        print("Entered Email: $enteredEmail");
-                        print("Entered Password: $enteredPassword");
-                        Map<String, dynamic> userData = {
-                          'email': enteredEmail,
-                          'password': enteredPassword,
-                        };
-                        var userresponse = await userlogin(userData);
-                        var organizerresponse = await organizerlogin(userData);
-                        if (userresponse) {
-                          SharedData.instance.sharedVariable = 'User';
+                            print("Entered Email: $enteredEmail");
+                            print("Entered Password: $enteredPassword");
+                            Map<String, dynamic> userData = {
+                              'email': enteredEmail,
+                              'password': enteredPassword,
+                            };
+                            var userresponse = await userlogin(userData);
+                            var organizerresponse =
+                                await organizerlogin(userData);
+                            if (userresponse) {
+                              await SharedData.instance
+                                  .saveSharedVariable('User');
+                              await my_messaging_init_app();
 
-                          Navigator.pushNamedAndRemoveUntil(
-                              context, '/', (route) => false);
-                        } else if (organizerresponse) {
-                          SharedData.instance.sharedVariable = 'Organizer';
-                          Navigator.pushNamedAndRemoveUntil(
-                              context, '/', (route) => false);
-                        } else {
+                              List<String>? topics =
+                                  await endpoint_getUserTopics(
+                                      userData['email']);
 
-                          // Show SnackBar for unsuccessful login
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  'Login unsuccessful. Please check your credentials.'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }),
+                              print(topics);
+                              if (topics != null) {
+                                subscribeUserToHisTopics(topics);
+                                print(
+                                    "User subscribed succefully to his topics");
+                              }
+                              Navigator.pushNamedAndRemoveUntil(
+                                  context, '/', (route) => false);
+                            } else if (organizerresponse) {
+                              await SharedData.instance
+                                  .saveSharedVariable('Organizer');
+                              await my_messaging_init_app();
+                              Navigator.pushNamedAndRemoveUntil(
+                                  context, '/', (route) => false);
+                            } else {
+                              // Show SnackBar for unsuccessful login
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Login unsuccessful. Please check your credentials.'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }),
                   const SizedBox(
                     height: 30,
                   ),
@@ -149,14 +184,14 @@ class _LoginState extends State<Login> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => UserOragnization(),
+                                builder: (context) => const UserOragnization(),
                               ));
                         },
                         child: Text(
                           'Sign up',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: const Color(0x662549).withOpacity(1),
+                            color: const Color(0x00662549).withOpacity(1),
                           ),
                         ),
                       ),
@@ -169,5 +204,11 @@ class _LoginState extends State<Login> {
         ],
       ),
     ));
+  }
+
+  Future<void> subscribeUserToHisTopics(List<String> topics) async {
+    for (String topic in topics) {
+      await FirebaseMessaging.instance.subscribeToTopic(topic);
+    }
   }
 }

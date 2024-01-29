@@ -1,6 +1,6 @@
 class AppConfig {
   static const String backendBaseUrl =
-      'http://192.168.173.203/eventyBackendGit/';
+      'https://eventybackend.000webhostapp.com/';
   static const String backendBaseUrlImg =
-      'http://192.168.173.203/eventyBackendGit/';
+      'https://eventybackend.000webhostapp.com/';
 }

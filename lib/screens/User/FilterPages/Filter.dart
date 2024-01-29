@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:eventy/Components/PageAppBar.dart';
 import 'package:eventy/Components/DropDown.dart';
@@ -204,14 +203,13 @@ class _FilterState extends State<Filter> {
                     // Add your action here
                     resetFilter();
                   },
-                  child: Icon(Ionicons.refresh_outline),
                   style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
+                    shape: const CircleBorder(), backgroundColor: const Color.fromARGB(
+                        255, 244, 220, 220),
                     padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-                    elevation: 0, // Shadow depth
-                    primary: const Color.fromARGB(
-                        255, 244, 220, 220), // Change FAB color
+                    elevation: 0, // Change FAB color
                   ),
+                  child: const Icon(Ionicons.refresh_outline),
                 ),
               ]),
         ),

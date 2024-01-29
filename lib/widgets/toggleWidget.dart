@@ -24,7 +24,7 @@ class _ToggleSwitchState extends State<ToggleSwitch> {
           widget.onChanged!(value);
         }
       },
-      activeColor: Color(0xFF562525),
+      activeColor: const Color(0xFF562525),
       inactiveThumbColor: Colors.black,
       inactiveTrackColor: Colors.grey,
     );

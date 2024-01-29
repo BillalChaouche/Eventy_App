@@ -16,7 +16,7 @@ class AvatarCard extends StatelessWidget {
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(50),
                 border: Border.all(
-                  color: Color(0x662549).withOpacity(1),
+                  color: const Color(0x00662549).withOpacity(1),
                   width: 2,
                 )),
             child: ClipRRect(
@@ -29,7 +29,7 @@ class AvatarCard extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -41,15 +41,15 @@ class AvatarCard extends StatelessWidget {
                   color: Color.fromARGB(255, 0, 0, 0),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               Container(
-                child: Icon(Icons.edit),
+                child: const Icon(Icons.edit),
               )
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           ElevatedButton(
@@ -59,14 +59,14 @@ class AvatarCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0), // Border radius
                   side: BorderSide(
-                    color: Color(0x662549).withOpacity(1), // Border color
+                    color: const Color(0x00662549).withOpacity(1), // Border color
                     width: 2.0, // Border width
                   ),
                 ),
               ),
               child: Text("Following",
                   style: TextStyle(
-                    color: Color(0x662549).withOpacity(1),
+                    color: const Color(0x00662549).withOpacity(1),
                   ))),
         ],
       ),

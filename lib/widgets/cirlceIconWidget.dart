@@ -1,4 +1,3 @@
-import 'package:eventy/widgets/profileWidget.dart';
 import 'package:flutter/material.dart';
 
 typedef FunctionallityButton = void Function();

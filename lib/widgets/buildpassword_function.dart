@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Widget buildpasswordwidget(String text , TextEditingController controller , TextEditingController _passwordController , _formKey) {
+Widget buildpasswordwidget(String text , TextEditingController controller , TextEditingController passwordController , formKey) {
   return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -10,7 +10,7 @@ Widget buildpasswordwidget(String text , TextEditingController controller , Text
             controller: controller,
             obscureText: true,
             decoration: InputDecoration(
-              prefixIcon: Icon(Icons.lock),
+              prefixIcon: const Icon(Icons.lock),
               labelText: text,
               hintText: 'Enter password',
               hintStyle: const TextStyle(
@@ -31,7 +31,7 @@ Widget buildpasswordwidget(String text , TextEditingController controller , Text
             ),
             validator: (value) {
               // Validate the password confirmation
-              if (text.toLowerCase().contains('confirm') && value != _passwordController.text) {
+              if (text.toLowerCase().contains('confirm') && value != passwordController.text) {
                 return 'Passwords do not match';
               }
               return null; // Return null if the validation passes
@@ -42,8 +42,8 @@ Widget buildpasswordwidget(String text , TextEditingController controller , Text
           Padding(
             padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
             child: Text(
-              _formKey.currentState?.fields[text]?.errorText ?? '',
-              style: TextStyle(color: Colors.red),
+              formKey.currentState?.fields[text]?.errorText ?? '',
+              style: const TextStyle(color: Colors.red),
             ),
           ),
       ],

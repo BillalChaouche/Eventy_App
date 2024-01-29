@@ -158,9 +158,9 @@ class _CreateEvent2State extends State<CreateEvent2> {
                               widget.createdEvent['endDate'] =
                                   endDateController.text;
                               widget.createdEvent['startTime'] =
-                                  convertTo24Format(startTimeController.text);
+                                  startTimeController.text;
                               widget.createdEvent['endTime'] =
-                                  convertTo24Format(endTimeController.text);
+                                  endTimeController.text;
                               widget.createdEvent['location'] =
                                   locationController.text;
                               widget.createdEvent['availablePlaces'] =
@@ -208,7 +208,7 @@ class _CreateEvent2State extends State<CreateEvent2> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
+        SizedBox(
           width: MediaQuery.of(context).size.width * 0.27,
           child: GestureDetector(
             onTap: onPressed,

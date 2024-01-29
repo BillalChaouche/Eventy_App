@@ -1,5 +1,4 @@
 import 'package:eventy/EndPoints/endpoints.dart';
-import 'package:eventy/databases/DBUserOrganizer.dart';
 import 'package:eventy/models/SharedData.dart';
 import 'package:eventy/widgets/buildbutton_function.dart';
 import 'package:eventy/widgets/buildemail_function.dart';
@@ -25,6 +24,7 @@ class _SignUpUserState extends State<SignUpUser> {
       TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -71,42 +71,54 @@ class _SignUpUserState extends State<SignUpUser> {
                       _confirmPasswordController,
                       _passwordController,
                       _formKey),
-                  const SizedBox(
-                      height:
-                          30), // Add some spacing between checkbox and button
-                  buildbutton(
-                    text: 'SignUp',
-                    functionallityButton: () {
-                      if (_formKey.currentState!.validate()) {
-                        // Form is valid, process the data
-                        String enteredEmail = _emailController.text;
-                        String enteredPassword = _passwordController.text;
-                        String enteredUsername = _usernameController.text;
+                  const SizedBox(height: 30),
+                  isLoading
+                      ? const CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Color(0xFF662549)),
+                          strokeWidth: 2,
+                        )
+                      : buildbutton(
+                          text: 'SignUp',
+                          functionallityButton: () async {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            if (_formKey.currentState!.validate()) {
+                              // Form is valid, process the data
+                              String enteredEmail = _emailController.text;
+                              String enteredPassword = _passwordController.text;
+                              String enteredUsername = _usernameController.text;
 
-                        print("Entered Username: $enteredUsername");
-                        print("Entered Email: $enteredEmail");
-                        print("Entered Password: $enteredPassword");
-                        print(
-                            "sign up as: ${SharedData.instance.sharedVariable}");
-                        Map<String, dynamic> userData = {
-                          'name': enteredUsername,
-                          'email': enteredEmail,
-                          'password': enteredPassword,
-                        };
-                        if (SharedData.instance.sharedVariable == "User") {
-                          userSignup(userData);
-                        } else {
-                          organizerSignup(userData);
-                        }
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const EmailVerification()),
-                        );
-                      }
-                      ;
-                    },
-                  ),
+                              print("Entered Username: $enteredUsername");
+                              print("Entered Email: $enteredEmail");
+                              print("Entered Password: $enteredPassword");
+                              print(
+                                  "sign up as: ${await SharedData.instance.getSharedVariable()}");
+                              Map<String, dynamic> userData = {
+                                'name': enteredUsername,
+                                'email': enteredEmail,
+                                'password': enteredPassword,
+                              };
+                              if (await SharedData.instance
+                                      .getSharedVariable() ==
+                                  "User") {
+                                await userSignup(userData);
+                              } else {
+                                await organizerSignup(userData);
+                              }
+                              setState(() {
+                                isLoading = false;
+                              });
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const EmailVerification()),
+                              );
+                            }
+                          },
+                        ),
                   const SizedBox(
                     height: 30,
                   ),
@@ -132,7 +144,7 @@ class _SignUpUserState extends State<SignUpUser> {
                           'Login',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: const Color(0x662549).withOpacity(1),
+                            color: const Color(0x00662549).withOpacity(1),
                           ),
                         ),
                       ),

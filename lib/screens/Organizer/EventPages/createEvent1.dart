@@ -1,3 +1,8 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:eventy/databases/DBcategory.dart';
 import 'package:eventy/screens/Organizer/EventPages/createEvent2.dart';
@@ -7,16 +12,24 @@ import 'package:eventy/widgets/circleStepRow.dart';
 import 'package:eventy/widgets/inputWidgets.dart';
 import 'package:eventy/widgets/appBar.dart';
 
+typedef FunctionallityButton = void Function(String? value);
+
 class CreateEvent1 extends StatefulWidget {
+  const CreateEvent1({super.key});
+
   @override
   _CreateEvent1State createState() => _CreateEvent1State();
 }
 
 class _CreateEvent1State extends State<CreateEvent1> {
-  TextEditingController _eventNameController = TextEditingController();
-  TextEditingController _eventDescriptionController = TextEditingController();
+  final TextEditingController _eventNameController = TextEditingController();
+  final TextEditingController _eventDescriptionController =
+      TextEditingController();
   String? _selectedEventType = '';
   late Future<List<Map<String, dynamic>>> _categoriesFuture;
+  String imgURL = "";
+  late Uint8List uint8List;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -34,7 +47,7 @@ class _CreateEvent1State extends State<CreateEvent1> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              CircleStepRow(step: 1),
+              const CircleStepRow(step: 1),
               const SizedBox(height: 35),
               Container(
                 padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -69,12 +82,12 @@ class _CreateEvent1State extends State<CreateEvent1> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return CircularProgressIndicator();
+                          return const CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         } else if (!snapshot.hasData ||
                             snapshot.data!.isEmpty) {
-                          return Text('No categories available');
+                          return const Text('No categories available');
                         } else {
                           return customDropdownInput(snapshot);
                         }
@@ -109,37 +122,57 @@ class _CreateEvent1State extends State<CreateEvent1> {
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [FileInputWidget()],
+                      children: [
+                        FileInputWidget(
+                          onImageSelected: handleImageSelected,
+                        )
+                      ],
                     ),
                     const SizedBox(height: 35),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        PersonalizedButtonWidget(
-                          context: context,
-                          buttonText: "Next",
-                          onClickListener: () {
-                            // Capture values from input fields
-                            String eventName = _eventNameController.text;
-                            String? eventType = _selectedEventType;
-                            String eventDescription =
-                                _eventDescriptionController.text;
+                        isLoading
+                            ? const CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF662549)),
+                                strokeWidth: 2,
+                              )
+                            : PersonalizedButtonWidget(
+                                context: context,
+                                buttonText: "Next",
+                                onClickListener: () async {
+                                  setState(() {
+                                    isLoading = true;
+                                  });
+                                  // Capture values from input fields
+                                  String imageURL =
+                                      await uploadImageToFirebaseStorage(
+                                          uint8List);
+                                  String eventName = _eventNameController.text;
+                                  String? eventType = _selectedEventType;
+                                  String eventDescription =
+                                      _eventDescriptionController.text;
 
-                            // Create the map
-                            Map<String, dynamic> createdEvent = {
-                              'eventName': eventName,
-                              'eventType': eventType,
-                              'eventDescription': eventDescription,
-                            };
+                                  // Create the map
+                                  Map<String, dynamic> createdEvent = {
+                                    'eventName': eventName,
+                                    'eventType': eventType,
+                                    'eventDescription': eventDescription,
+                                    'imagePath': imageURL,
+                                  };
 
-                            print(createdEvent);
+                                  print(createdEvent);
+                                  setState(() {
+                                    isLoading = false;
+                                  });
 
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) =>
-                                  CreateEvent2(createdEvent: createdEvent),
-                            ));
-                          },
-                        ),
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => CreateEvent2(
+                                        createdEvent: createdEvent),
+                                  ));
+                                },
+                              ),
                       ],
                     )
                   ],
@@ -153,7 +186,7 @@ class _CreateEvent1State extends State<CreateEvent1> {
   }
 
   Widget customDropdownInput(snapshot) {
-    List<Map<String, dynamic>> categories = snapshot.data!;
+    List<Map<String, dynamic>> categories = snapshot.data!.skip(1).toList();
     List<DropdownMenuItem<String>> dropdownItems =
         categories.map<DropdownMenuItem<String>>((category) {
       return DropdownMenuItem<String>(
@@ -163,7 +196,7 @@ class _CreateEvent1State extends State<CreateEvent1> {
     }).toList();
 
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(
             color: Color(0xFFBDBDBD),
@@ -183,11 +216,11 @@ class _CreateEvent1State extends State<CreateEvent1> {
                   _selectedEventType = value;
                 });
               },
-              icon: Icon(
+              icon: const Icon(
                 Icons.arrow_drop_down,
                 color: Colors.transparent,
               ),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Select an option',
                 hintStyle: TextStyle(
                   fontWeight: FontWeight.normal,
@@ -197,7 +230,7 @@ class _CreateEvent1State extends State<CreateEvent1> {
               ),
             ),
           ),
-          Icon(
+          const Icon(
             Icons.keyboard_arrow_down,
             color: Color(0xFFBDBDBD),
           ),
@@ -209,7 +242,7 @@ class _CreateEvent1State extends State<CreateEvent1> {
   TextField customInput(TextEditingController inputController) {
     return TextField(
       controller: inputController,
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         contentPadding: EdgeInsets.zero,
         hintText: '  Enter the event name',
         hintStyle: TextStyle(fontWeight: FontWeight.normal, color: Colors.grey),
@@ -250,5 +283,49 @@ class _CreateEvent1State extends State<CreateEvent1> {
             const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
       ),
     );
+  }
+
+  void handleImageSelected(String? imagePath) async {
+    if (imagePath != null) {
+      File imageFile = File(imagePath);
+
+      if (await imageFile.exists()) {
+        List<int> imageBytes = await imageFile.readAsBytes();
+
+        // Upload image to Firebase Storage
+        uint8List = Uint8List.fromList(imageBytes);
+        uint8List = await reduceImageQuality(uint8List);
+      }
+    }
+  }
+
+  Future<Uint8List> reduceImageQuality(List<int> imageBytes) async {
+    img.Image? originalImage = img.decodeImage(Uint8List.fromList(imageBytes));
+    if (originalImage != null) {
+      // Reduce the image quality by encoding it with a lower quality
+      Uint8List reducedQualityBytes = Uint8List.fromList(img.encodeJpg(
+          originalImage,
+          quality: 50)); // Adjust the quality as needed
+
+      return reducedQualityBytes;
+    } else {
+      throw Exception('Failed to decode the image');
+    }
+  }
+
+  Future<String> uploadImageToFirebaseStorage(Uint8List imageBytes) async {
+    String imageName =
+        'event_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child('event_images')
+        .child(imageName);
+
+    firebase_storage.UploadTask uploadTask = ref.putData(imageBytes);
+
+    await uploadTask;
+    String downloadURL = await ref.getDownloadURL();
+
+    return downloadURL;
   }
 }

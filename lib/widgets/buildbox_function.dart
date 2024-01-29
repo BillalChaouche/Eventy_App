@@ -7,7 +7,7 @@ Widget buildboxwidget({required TextEditingController controller}) {
     width: 65,
     child: TextField(
       controller: controller,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 18, // Adjust the font size as needed
         fontWeight: FontWeight.bold, // Adjust the font weight as needed
       ),
@@ -17,7 +17,7 @@ Widget buildboxwidget({required TextEditingController controller}) {
         LengthLimitingTextInputFormatter(1),
         FilteringTextInputFormatter.digitsOnly,
       ],
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         contentPadding: EdgeInsets.all(20), // Adjust padding as needed
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(

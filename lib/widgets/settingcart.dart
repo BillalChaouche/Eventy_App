@@ -12,7 +12,7 @@ class SettingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 10),
       child: GestureDetector(
         onTap: () {}, // Navigation
         child: Row(

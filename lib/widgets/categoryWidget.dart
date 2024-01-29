@@ -41,18 +41,18 @@ class _CategoryWidgetState extends State<CategoryWidget> {
         )
       },
       child: Container(
-        margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+        margin: const EdgeInsets.fromLTRB(0, 0, 0, 15),
         width: 100,
         height: 120,
         decoration: BoxDecoration(
-          color: Color.fromARGB(255, 255, 255, 255),
+          color: const Color.fromARGB(255, 255, 255, 255),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
               color: const Color.fromARGB(255, 227, 227, 227).withOpacity(0.1),
               spreadRadius: 5,
               blurRadius: 7,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -69,7 +69,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     width: 30,
                     height: 30,
                     iconSize: 14,
-                    color: Color.fromARGB(255, 227, 185, 185),
+                    color: const Color.fromARGB(255, 227, 185, 185),
                     functionallityButton: () {
                       isLiked = !isLiked;
                       setState(() {
@@ -94,12 +94,12 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 7,
             ),
             Text(
               widget.title,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
           ],
         ),

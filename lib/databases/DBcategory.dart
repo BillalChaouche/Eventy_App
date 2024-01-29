@@ -21,7 +21,7 @@ class DBCategory {
             name,
             icon,
             remote_id
-          from ${tableName}
+          from $tableName
           ''');
   }
 
@@ -50,32 +50,32 @@ class DBCategory {
   */
   static Future<bool> service_sync_categories() async {
     print("Running Cron Service to get Categories");
-    List? remote_data = await endpoint_api_get(
-        AppConfig.backendBaseUrl + 'categories.php/?action=categories.get');
+    List? remoteData = await endpoint_api_get(
+        '${AppConfig.backendBaseUrl}categories.php/?action=categories.get');
 
-    if (remote_data != null) {
+    if (remoteData != null) {
       await DBCategory.syncCategories(
-          remote_data as List<Map<String, dynamic>>);
+          remoteData as List<Map<String, dynamic>>);
       return true;
     }
     return false;
   }
 
   static Future<bool> syncCategories(
-      List<Map<String, dynamic>> remote_data) async {
-    List local_data = await getAllCategories();
-    Map index_remote = {};
-    List local_ids = [];
-    for (Map item in local_data) {
-      index_remote[item['remote_id']] = item['id'];
-      local_ids.add(item['id']);
+      List<Map<String, dynamic>> remoteData) async {
+    List localData = await getAllCategories();
+    Map indexRemote = {};
+    List localIds = [];
+    for (Map item in localData) {
+      indexRemote[item['remote_id']] = item['id'];
+      localIds.add(item['id']);
     }
 
-    for (Map item in remote_data) {
-      if (index_remote.containsKey(item['id'])) {
-        int local_id = index_remote[item['id']];
-        await updateRecord(local_id, {'name': item['name']});
-        local_ids.remove(local_id);
+    for (Map item in remoteData) {
+      if (indexRemote.containsKey(item['id'])) {
+        int localId = indexRemote[item['id']];
+        await updateRecord(localId, {'name': item['name']});
+        localIds.remove(localId);
       } else {
         await insertRecord({
           'name': item['name'],
@@ -86,7 +86,9 @@ class DBCategory {
     }
     //Remote Local Categories...
     //There is a RISK ? in case items pending with old data?
-    for (int local_id in local_ids) await deleteRecord(local_id);
+    for (int local_id in localIds) {
+      await deleteRecord(local_id);
+    }
     return true;
   }
 
@@ -104,7 +106,7 @@ class DBCategory {
 
   static Future<bool> deleteRecord(int id) async {
     final database = await DBHelper.getDatabase();
-    database.rawQuery("""delete from  ${tableName}  where id=?""", [id]);
+    database.rawQuery("""delete from  $tableName  where id=?""", [id]);
     return true;
   }
 }

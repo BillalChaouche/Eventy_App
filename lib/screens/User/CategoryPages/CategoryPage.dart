@@ -137,7 +137,7 @@ class _CategoryPage extends State<CategoryPage> {
                     }
                     // If the condition is not met, return an empty Container or SizedBox
                     // You can replace Container/SizedBox with any other widget that fits your layout
-                    return SizedBox(); // or SizedBox(height: 0);
+                    return const SizedBox(); // or SizedBox(height: 0);
                   },
                 )
               ],
@@ -155,7 +155,7 @@ class _CategoryPage extends State<CategoryPage> {
       builder: (BuildContext context) {
         return Container(
           height: MediaQuery.of(context).size.height * 0.7,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             // Set a background color
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20.0),
@@ -163,7 +163,7 @@ class _CategoryPage extends State<CategoryPage> {
             ),
           ),
           // Set your desired height
-          child: Filter(), // Replace with your FilterPage widget
+          child: const Filter(), // Replace with your FilterPage widget
         );
       },
     );
@@ -174,7 +174,7 @@ class _CategoryPage extends State<CategoryPage> {
       context: context,
       isScrollControlled: true, // Set to true to control height
       builder: (BuildContext context) {
-        return Container(
+        return SizedBox(
           height:
               MediaQuery.of(context).size.height * 1, // Set your desired height
           child: Event(

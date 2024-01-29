@@ -17,7 +17,7 @@ class PersonalizedButtonWidget extends StatelessWidget {
     return Container(
       width: MediaQuery.of(context).size.width * 0.5,
       height: 50,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(25.0),
           bottomLeft: Radius.circular(25.0),
@@ -29,8 +29,8 @@ class PersonalizedButtonWidget extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          splashColor: Color(0xFFCE99A3), // Set the splash color here
-          borderRadius: BorderRadius.only(
+          splashColor: const Color(0xFFCE99A3), // Set the splash color here
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(25.0),
             bottomLeft: Radius.circular(25.0),
             topRight: Radius.circular(25.0),
@@ -40,7 +40,7 @@ class PersonalizedButtonWidget extends StatelessWidget {
           child: Center(
             child: Text(
               buttonText,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),

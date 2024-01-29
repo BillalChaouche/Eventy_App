@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:eventy/RootPage.dart';
 import 'package:eventy/Providers/EventProvider.dart';
+import 'package:eventy/databases/DBUserOrganizer.dart';
 import 'package:eventy/databases/DBcategory.dart';
 import 'package:eventy/databases/DBevent.dart';
-import 'package:eventy/screens/User/CategoryPages/Categories.dart';
 
 import 'package:eventy/screens/User/FilterPages/Filter.dart';
 import 'package:eventy/screens/User/EventPages/Event.dart';
@@ -22,6 +20,8 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
   _Home createState() => _Home();
 }
@@ -29,6 +29,7 @@ class Home extends StatefulWidget {
 class _Home extends State<Home> {
   final ScrollController _scrollController = ScrollController();
   late Future<List<Map<String, dynamic>>> _fetchCategories;
+  late Future<List<Map<String, dynamic>>> _user;
   bool showText = false; // Default text for the AppBar
   double heightAppBar = 0;
   bool _isLoading = true;
@@ -51,6 +52,8 @@ class _Home extends State<Home> {
     showText = false;
     heightAppBar = 0;
     _fetchCategories = fetchingCategories();
+    getEvents();
+    _user = fetchUserInfo();
     _startLoading();
     Provider.of<EventProvider>(context, listen: false).getEvents();
     _refreshController = RefreshController(initialRefresh: false);
@@ -65,12 +68,20 @@ class _Home extends State<Home> {
         _refreshController.refreshFailed();
       }
       await DBCategory.service_sync_categories();
+      _user = fetchUserInfo();
+      print(_user);
       _fetchCategories = fetchingCategories();
-      await Provider.of<EventProvider>(context, listen: false).emptyEvents();
-      await Provider.of<EventProvider>(context, listen: false).getEvents();
+      getEvents();
+
       _refreshController.refreshCompleted();
       setState(() {});
     } catch (e) {}
+  }
+
+  Future<void> getEvents() async {
+    await DBEvent.service_sync_events();
+    await Provider.of<EventProvider>(context, listen: false).emptyEvents();
+    await Provider.of<EventProvider>(context, listen: false).getEvents();
   }
 
   void _onLoading() async {
@@ -82,15 +93,19 @@ class _Home extends State<Home> {
         _refreshController.refreshFailed();
       }
       await DBCategory.service_sync_categories();
-      await Provider.of<EventProvider>(context, listen: false).emptyEvents();
-      await Provider.of<EventProvider>(context, listen: false).getEvents();
+      getEvents();
       _refreshController.loadComplete();
       setState(() {});
     } catch (e) {}
   }
 
+  Future<List<Map<String, dynamic>>> fetchUserInfo() async {
+    await DBUserOrganizer.service_sync_user();
+    return await DBUserOrganizer.getAllUsers();
+  }
+
   Future<List<Map<String, dynamic>>> fetchingCategories() async {
-    await Future.delayed(Duration(seconds: 4));
+    await DBCategory.service_sync_categories();
     List<Map<String, dynamic>> categories = await DBCategory.getAllCategories();
     // Create a new list with modified 'selected' property
     List<Map<String, dynamic>> modifiedCategories = [];
@@ -108,7 +123,7 @@ class _Home extends State<Home> {
   }
 
   void _startLoading() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
           _isLoading = !_isLoading;
@@ -173,8 +188,8 @@ class _Home extends State<Home> {
             controller: _refreshController,
             onRefresh: _onRefresh,
             onLoading: _onLoading,
-            header: ClassicHeader(
-              refreshingIcon: const SizedBox(
+            header: const ClassicHeader(
+              refreshingIcon: SizedBox(
                 width: 25,
                 height: 25,
                 child: CircularProgressIndicator(
@@ -182,27 +197,27 @@ class _Home extends State<Home> {
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF662549)),
                 ),
               ),
-              idleIcon: const Icon(
+              idleIcon: Icon(
                 Icons.refresh,
                 color: Color(0xFF662549),
               ),
-              releaseIcon: const Icon(
+              releaseIcon: Icon(
                 Icons.refresh,
                 color: Color(0xFF662549),
               ),
-              completeIcon: const Icon(
+              completeIcon: Icon(
                 Ionicons.checkmark_circle_outline,
                 color: Color.fromARGB(255, 135, 244, 138),
               ),
-              failedIcon: const Icon(Icons.error,
-                  color: const Color.fromARGB(255, 239, 92, 92)),
+              failedIcon:
+                  Icon(Icons.error, color: Color.fromARGB(255, 239, 92, 92)),
               idleText: '',
               releaseText: '',
               refreshingText: '',
               completeText: '',
               failedText: 'Refresh failed',
               textStyle: TextStyle(
-                  color: const Color.fromARGB(
+                  color: Color.fromARGB(
                       255, 239, 92, 92)), // Change the text color here
             ),
             child: SingleChildScrollView(
@@ -222,8 +237,33 @@ class _Home extends State<Home> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        profileWidget(47, 47, 'assets/images/profile.jpg', true,
-                            NavigateToProfilePage),
+                        FutureBuilder<List<Map<String, dynamic>>>(
+                          future: _user,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<List<Map<String, dynamic>>>
+                                  snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Container();
+                            } else if (snapshot.hasError) {
+                              return const Text('Error fetching user data');
+                            } else {
+                              List<Map<String, dynamic>> userData =
+                                  snapshot.data ?? [];
+                              if (userData.isNotEmpty &&
+                                  userData[0]['imgPath'] != null) {
+                                return profileWidget(
+                                    47,
+                                    47,
+                                    userData[0]['imgPath'],
+                                    true,
+                                    NavigateToProfilePage);
+                              } else {
+                                return const Text('No profile image found');
+                              }
+                            }
+                          },
+                        ),
                         circleIconWidget(47, 47, Ionicons.notifications_outline,
                             () {
                           Navigator.pushNamed(context, '/Notifications');
@@ -245,24 +285,24 @@ class _Home extends State<Home> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Container(
+                          return SizedBox(
                             height: 80,
                             width: double.infinity,
                             child: ListView(
                               scrollDirection: Axis.horizontal,
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               children: [
                                 Row(children: [
                                   categroyShadow(),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 12,
                                   ),
                                   categroyShadow(),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 12,
                                   ),
                                   categroyShadow(),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 12,
                                   ),
                                   categroyShadow(),
@@ -272,7 +312,7 @@ class _Home extends State<Home> {
                           );
                           // Show a loading indicator while fetching data
                         } else if (snapshot.hasError) {
-                          return Text(
+                          return const Text(
                               'Error fetching data'); // Show an error message if data fetch fails
                         } else {
                           List<Map<String, dynamic>> categories =
@@ -291,7 +331,7 @@ class _Home extends State<Home> {
                             });
                           }
 
-                          return Container(
+                          return SizedBox(
                             height: 80,
                             child: ListView(
                               scrollDirection: Axis.horizontal,
@@ -344,7 +384,7 @@ class _Home extends State<Home> {
                         ); // Show a loader if events are being fetched
                       } else if (eventProvider.events.isEmpty &&
                           eventProvider.noData) {
-                        return Container(
+                        return const SizedBox(
                             width: double.infinity,
                             height: 300,
                             child: Center(
@@ -363,7 +403,6 @@ class _Home extends State<Home> {
                           itemBuilder: (context, index) {
                             var event = eventProvider.events[index];
                             return eventWidget(
-                              // other parameters...
                               event: event,
                               buttonFunctionality: showEvent,
                               save: true,
@@ -387,7 +426,7 @@ class _Home extends State<Home> {
       builder: (BuildContext context) {
         return Container(
           height: MediaQuery.of(context).size.height * 0.7,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             // Set a background color
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20.0),
@@ -395,7 +434,7 @@ class _Home extends State<Home> {
             ),
           ),
           // Set your desired height
-          child: Filter(), // Replace with your FilterPage widget
+          child: const Filter(), // Replace with your FilterPage widget
         );
       },
     );
@@ -406,7 +445,7 @@ class _Home extends State<Home> {
       context: context,
       isScrollControlled: true, // Set to true to control height
       builder: (BuildContext context) {
-        return Container(
+        return SizedBox(
           height:
               MediaQuery.of(context).size.height * 1, // Set your desired height
           child: Event(
@@ -425,7 +464,7 @@ class _Home extends State<Home> {
     return AnimatedContainer(
       height: 50,
       width: 90,
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(40.0),
         gradient: LinearGradient(
@@ -447,10 +486,10 @@ class _Home extends State<Home> {
 
   Widget eventShadow() {
     return AnimatedContainer(
-      margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 20),
       width: double.infinity,
       height: 170,
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15.0),
         gradient: LinearGradient(

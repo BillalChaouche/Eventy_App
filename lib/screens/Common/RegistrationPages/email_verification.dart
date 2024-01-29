@@ -16,6 +16,7 @@ class _EmailVerificationState extends State<EmailVerification> {
   final TextEditingController _controller2 = TextEditingController();
   final TextEditingController _controller3 = TextEditingController();
   final TextEditingController _controller4 = TextEditingController();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -64,38 +65,46 @@ class _EmailVerificationState extends State<EmailVerification> {
                     ],
                   )),
                 ),
-                const SizedBox(
-                    height: 20), // Add some spacing between checkbox and button
-                buildbutton(
-                    text: 'Continue',
-                    functionallityButton: () async {
-                      // Read entered numbers and form the verification code
-                      String verificationCode = _controller1.text +
-                          _controller2.text +
-                          _controller3.text +
-                          _controller4.text;
-                      print(
-                          'Sending verification email with code: $verificationCode');
-                      var response = await verify_email(verificationCode);
-                      // Call the function to send verification email with the code
-                      if (response) {
-                        // Continue with the navigation or any other action
-
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, '/', (route) => false);
-
-                      } else {
-                        // Show SnackBar for unsuccessful verification
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Verification code is incorrect. Please try again.'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-
-                    }),
+                const SizedBox(height: 20),
+                isLoading
+                    ? const CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFF662549)),
+                        strokeWidth: 2,
+                      )
+                    : // Add some spacing between checkbox and button
+                    buildbutton(
+                        text: 'Continue',
+                        functionallityButton: () async {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          // Read entered numbers and form the verification code
+                          String verificationCode = _controller1.text +
+                              _controller2.text +
+                              _controller3.text +
+                              _controller4.text;
+                          print(
+                              'Sending verification email with code: $verificationCode');
+                          var response = await verify_email(verificationCode);
+                          setState(() {
+                            isLoading = false;
+                          });
+                          // Call the function to send verification email with the code
+                          if (response) {
+                            // Continue with the navigation or any other action
+                            Navigator.pushNamed(context, '/SetupProfile');
+                          } else {
+                            // Show SnackBar for unsuccessful verification
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Verification code is incorrect. Please try again.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }),
                 const SizedBox(
                   height: 30,
                 ),

@@ -6,7 +6,7 @@ Widget fullInput(String title, String hint, TextEditingController inputControlle
     children: [
       Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           color: Color(0xFF363636),
           fontWeight: FontWeight.bold,
         ),
@@ -16,12 +16,12 @@ Widget fullInput(String title, String hint, TextEditingController inputControlle
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
           hintText: hint,
-          hintStyle: TextStyle(fontWeight: FontWeight.normal, color: Colors.grey),
+          hintStyle: const TextStyle(fontWeight: FontWeight.normal, color: Colors.grey),
           border: InputBorder.none,
-          enabledBorder: UnderlineInputBorder(
+          enabledBorder: const UnderlineInputBorder(
             borderSide: BorderSide(color: Color(0xFFBDBDBD)),
           ),
-          focusedBorder: UnderlineInputBorder(
+          focusedBorder: const UnderlineInputBorder(
             borderSide: BorderSide(color: Color(0xFF662549)),
           ),
         ),

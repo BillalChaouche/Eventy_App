@@ -6,8 +6,8 @@ Widget buildusernamewidget(TextEditingController controller) {
     child: TextFormField(
       controller: controller,
       decoration: InputDecoration(
-        prefixIcon: Icon(Icons.person),
-        label: Text('Full Name'),
+        prefixIcon: const Icon(Icons.person),
+        label: const Text('Full Name'),
         hintText: 'Enter Full Name',
         hintStyle: const TextStyle(
           color: Colors.black26,

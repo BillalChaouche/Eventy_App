@@ -1,5 +1,4 @@
 import 'package:eventy/EndPoints/endpoints.dart';
-import 'package:eventy/Static/AppConfig.dart';
 import 'package:eventy/databases/DBUserOrganizer.dart';
 import 'package:sqflite/sqflite.dart';
 import 'DBHelper.dart';
@@ -44,7 +43,7 @@ class DBEventOrg {
             location,
             category,
             flag
-          from ${tableName}
+          from $tableName
           order by title ASC
           ''');
   }
@@ -67,7 +66,7 @@ class DBEventOrg {
             location,
             category,
             flag
-          from ${tableName}
+          from $tableName
           Where LOWER(title) like '%${keyword.toLowerCase()}%' 
           order by title ASC
           ''');
@@ -75,8 +74,9 @@ class DBEventOrg {
 
   static Future<List<Map<String, dynamic>>> getAllEventsByCategory(
       String category) async {
-    if (category.isEmpty || category.trim() == '' || category == 'My feed')
+    if (category.isEmpty || category.trim() == '' || category == 'My feed') {
       return getAllEvents();
+    }
 
     final database = await DBHelper.getDatabase();
 
@@ -92,7 +92,7 @@ class DBEventOrg {
             location,
             category,
             flag
-          from ${tableName}
+          from $tableName
           Where LOWER(category) like '%${category.toLowerCase()}%' 
           order by title ASC
           ''');
@@ -103,7 +103,7 @@ class DBEventOrg {
 
     List<Map> res = await database.rawQuery('''SELECT 
             count(id) as cc
-          from ${tableName}
+          from $tableName
           ''');
     return res[0]['cc'] ?? 0;
   }
@@ -126,7 +126,7 @@ class DBEventOrg {
             attendees,
             location,
             category
-          from ${tableName}
+          from $tableName
           where flag=1
           ''');
   }
@@ -139,22 +139,22 @@ class DBEventOrg {
     return result;
   }
 
-  static Future<bool> syncEvents(List<Map<String, dynamic>> remote_data) async {
-    List local_data = await getAllEvents();
-    Map index_remote = {};
-    List local_ids = [];
-    for (Map item in local_data) {
-      index_remote[item['remote_id']] = item['id'];
-      local_ids.add(item['id']);
+  static Future<bool> syncEvents(List<Map<String, dynamic>> remoteData) async {
+    List localData = await getAllEvents();
+    Map indexRemote = {};
+    List localIds = [];
+    for (Map item in localData) {
+      indexRemote[item['remote_id']] = item['id'];
+      localIds.add(item['id']);
     }
 
-    for (Map item in remote_data) {
-      if (index_remote.containsKey(item['id'])) {
-        int local_id = index_remote[item['id']];
+    for (Map item in remoteData) {
+      if (indexRemote.containsKey(item['id'])) {
+        int localId = indexRemote[item['id']];
         int booked = item['booked'] ?? 0;
         int saved = item['saved'] ?? 0;
         int accepted = item['accepted'] ?? 0;
-        await updateRecord(local_id, {
+        await updateRecord(localId, {
           'title': item['title'],
           'remote_id': item['id'],
           'imagePath': item['imagePath'],
@@ -167,7 +167,7 @@ class DBEventOrg {
           'flag': 0
         });
 
-        local_ids.remove(local_id);
+        localIds.remove(localId);
       } else {
         int booked = item['booked'] ?? 0;
         int saved = item['saved'] ?? 0;
@@ -186,7 +186,9 @@ class DBEventOrg {
         });
       }
     }
-    for (int local_id in local_ids) await deleteRecord(local_id);
+    for (int local_id in localIds) {
+      await deleteRecord(local_id);
+    }
     return true;
   }
 
@@ -198,10 +200,10 @@ class DBEventOrg {
     List<Map<String, dynamic>> user = await DBUserOrganizer.getUser();
     String orgEmail = user[0]['email'];
 
-    List? remote_data = await endpoint_fetch_org_events(orgEmail);
+    List? remoteData = await endpoint_fetch_org_events(orgEmail);
 
-    if (remote_data != null) {
-      await DBEventOrg.syncEvents(remote_data as List<Map<String, dynamic>>);
+    if (remoteData != null) {
+      await DBEventOrg.syncEvents(remoteData as List<Map<String, dynamic>>);
       return true;
     }
     return false;
@@ -227,7 +229,7 @@ class DBEventOrg {
 
   static Future<bool> deleteRecord(int id) async {
     final database = await DBHelper.getDatabase();
-    database.rawQuery("""delete from  ${tableName}  where id=?""", [id]);
+    database.rawQuery("""delete from  $tableName  where id=?""", [id]);
     return true;
   }
 

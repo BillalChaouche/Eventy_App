@@ -10,7 +10,7 @@ class Dropdown extends StatefulWidget {
   final Function(String) onChanged;
 
   Dropdown(
-      {required this.options,
+      {super.key, required this.options,
       required this.selectedOption,
       required this.onChanged,
       required this.indexing,

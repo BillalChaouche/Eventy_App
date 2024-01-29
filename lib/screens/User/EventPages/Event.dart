@@ -24,6 +24,7 @@ class Event extends StatefulWidget {
 }
 
 class _EventState extends State<Event> {
+  bool isLoading = false;
   @override
   Widget build(BuildContext contex) {
     EventEntity event = Provider.of<EventProvider>(context)
@@ -42,9 +43,11 @@ class _EventState extends State<Event> {
                 decoration: BoxDecoration(
                   // Optional: Add border radius
                   image: DecorationImage(
-                    image: CachedNetworkImageProvider(
-                        AppConfig.backendBaseUrlImg +
-                            event.imgPath), // Replace with your image path
+                    image: (event.imgPath[0] == 'h')
+                        ? CachedNetworkImageProvider(event.imgPath)
+                        : CachedNetworkImageProvider(
+                            AppConfig.backendBaseUrlImg +
+                                event.imgPath), // Replace with your image path
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -85,7 +88,7 @@ class _EventState extends State<Event> {
                                 functionallityButton: () {
                                   eventProvider.toggleEventSavedState(event.id);
                                 }),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             blurButton(
                                 icon: Ionicons.share_social_outline,
                                 width: 40,
@@ -114,47 +117,47 @@ class _EventState extends State<Event> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              leftTitleWidget("${event.title}", 25),
-                              SizedBox(height: 10),
+                              leftTitleWidget(event.title, 25),
+                              const SizedBox(height: 10),
                               Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     categoryType(title: event.categories[0]),
                                   ]),
-                              SizedBox(height: 30),
+                              const SizedBox(height: 30),
                               eventDetail(
                                   firstTitle: event.date,
                                   secondTitle: event.time,
                                   need: "date"),
-                              SizedBox(height: 15),
+                              const SizedBox(height: 15),
                               eventDetail(
-                                  firstTitle: "${event.location}",
+                                  firstTitle: event.location,
                                   secondTitle: "Oran center ville",
                                   need: "location"),
-                              SizedBox(height: 15),
+                              const SizedBox(height: 15),
                               eventDetail(
-                                  firstTitle: "${event.organizer}",
+                                  firstTitle: event.organizer,
                                   secondTitle: "Organizer",
                                   need: "Image"),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               leftTitleWidget('About Event', 18),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               Text(
                                 "   ${event.description}",
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 15,
                                   height: 1.7,
                                   color: Color.fromARGB(141, 0, 0, 0),
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                             ]))),
               )
             ]),
         bottomNavigationBar: Container(
           height: 80, // Set the height of the bottom navbar
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             // Set background color to white
             boxShadow: [
               BoxShadow(
@@ -165,12 +168,29 @@ class _EventState extends State<Event> {
             ],
           ),
           child: Center(
-            child: flaotingButtonWidget(
-                title: (event.booked == 1) ? 'ALREADY BOOKED' : 'BOOK A TICKET',
-                buttonFunctionality: () => {
-                      if (event.booked == 0)
-                        {eventProvider.toggleEventBookedState(event.id)}
-                    }),
+            child: isLoading
+                ? const CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF662549)),
+                    strokeWidth: 2,
+                  )
+                : flaotingButtonWidget(
+                    title: (event.booked == 1)
+                        ? 'ALREADY BOOKED'
+                        : 'BOOK A TICKET',
+                    buttonFunctionality: () async => {
+                          if (event.booked == 0)
+                            {
+                              setState(() {
+                                isLoading = true;
+                              }),
+                              await eventProvider
+                                  .toggleEventBookedState(event.id)
+                            },
+                          setState(() {
+                            isLoading = false;
+                          }),
+                        }),
           ),
         ),
       ); // Add elevation (shadow));

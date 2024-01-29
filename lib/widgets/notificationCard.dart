@@ -1,6 +1,4 @@
-import 'package:eventy/models/EventEntity.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 
 Widget notificationCard({
   required String title,
@@ -11,9 +9,9 @@ Widget notificationCard({
   required bool urgent,
 }) {
   return Container(
-      margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 15),
       width: double.infinity,
-      height: 100,
+      height: 80,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
@@ -37,8 +35,8 @@ Widget notificationCard({
             ),
             child: Image.asset(
               imgPath,
-              width: 100,
-              height: 100,
+              width: 80,
+              height: 80,
               fit: BoxFit.cover,
             ),
           ),
@@ -55,7 +53,7 @@ Widget notificationCard({
                       Text(
                         title,
                         style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: (urgent) ? Colors.red : Colors.blue),
                         softWrap: true,
@@ -63,16 +61,9 @@ Widget notificationCard({
                       Text(
                         des,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
                         ),
                         softWrap: true,
-                      ),
-                      Text(
-                        '${date} -- ${time}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color.fromARGB(118, 0, 0, 0),
-                        ),
                       ),
                     ],
                   ))),

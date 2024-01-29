@@ -1,6 +1,11 @@
 import 'dart:ui';
 
+import 'package:barcode_scan2/model/scan_result.dart';
+import 'package:barcode_scan2/platform_wrapper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:camera/camera.dart';
+import 'package:eventy/EndPoints/userBookedEndpoints.dart';
+import 'package:eventy/Providers/UserBookedProvider.dart';
 import 'package:eventy/Static/AppConfig.dart';
 import 'package:eventy/models/EventEntity.dart';
 import 'package:eventy/screens/Organizer/EventPages/editEvent.dart';
@@ -12,7 +17,10 @@ import 'package:eventy/widgets/eventDetail.dart';
 import 'package:eventy/widgets/floatingButtonWidget.dart';
 import 'package:eventy/widgets/leftTitleWidget.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 class Event extends StatefulWidget {
   final int eventId;
@@ -27,19 +35,54 @@ class Event extends StatefulWidget {
 }
 
 class _EventState extends State<Event> {
+  late CameraController _controller;
+  late List<CameraDescription> cameras;
   bool isManagingSelected = false;
+  late var data;
 
   late PageController _pageController;
   int _currentPage = 0;
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
+    initializeCamera();
+  }
+
+  Future<void> initializeCamera() async {
+    // Request camera permission
+    var status = await Permission.camera.request();
+    if (status.isGranted) {
+      cameras = await availableCameras();
+      _controller = CameraController(cameras[0], ResolutionPreset.medium);
+      await _controller.initialize();
+    } else {
+      // Handle the case where the user denied camera permission
+      print('Camera permission denied');
+    }
+  }
+
+  int scannedCode = 0;
+
+  Future<void> scanBarcode() async {
+    try {
+      ScanResult barcode = await BarcodeScanner.scan();
+      setState(() {
+        scannedCode = int.parse(barcode.rawContent);
+      });
+      print(barcode.rawContent);
+    } catch (e) {
+      setState(() {
+        scannedCode = 0;
+      });
+    }
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -49,96 +92,90 @@ class _EventState extends State<Event> {
         HomeOrganizer.events.firstWhere((event) => event.id == widget.eventId);
 
     return Scaffold(
-      body: Stack(children: <Widget>[
-        Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(12, 40, 12, 0),
-                height: 300,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  // Optional: Add border radius
-                  image: DecorationImage(
-                    image: CachedNetworkImageProvider(
-                        AppConfig.backendBaseUrlImg +
-                            event.imgPath), // Replace with your image path
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            blurButton(
-                                icon: Ionicons.chevron_back_outline,
-                                width: 40,
-                                height: 40,
-                                iconSize: 18,
-                                color: Colors.white,
-                                functionallityButton: () =>
-                                    {Navigator.pop(context)})
-                          ],
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(width: 10),
-                            blurButton(
-                                icon: Ionicons.share_social_outline,
-                                width: 40,
-                                height: 40,
-                                iconSize: 17,
-                                color: Colors.white,
-                                functionallityButton: () => {})
-                          ],
-                        )
-                      ],
-                    ),
-                  ],
+      body: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 40, 12, 12),
+              height: 300,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                // Optional: Add border radius
+                image: DecorationImage(
+                  image: (event.imgPath[0] == 'h')
+                      ? CachedNetworkImageProvider(event.imgPath)
+                      : CachedNetworkImageProvider(AppConfig.backendBaseUrlImg +
+                          event.imgPath), // Replace with your image path
+                  fit: BoxFit.cover,
                 ),
               ),
-              Expanded(
-                  child: PageView(
-                physics: NeverScrollableScrollPhysics(),
-                controller: _pageController,
-                onPageChanged: (int page) {
-                  setState(() {
-                    _currentPage = page;
-                  });
-                },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  overviewPage(event),
-                  managingPage(),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          blurButton(
+                              icon: Ionicons.chevron_back_outline,
+                              width: 40,
+                              height: 40,
+                              iconSize: 18,
+                              color: Colors.white,
+                              functionallityButton: () =>
+                                  {Navigator.pop(context)})
+                        ],
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(width: 10),
+                          blurButton(
+                              icon: Ionicons.share_social_outline,
+                              width: 40,
+                              height: 40,
+                              iconSize: 17,
+                              color: Colors.white,
+                              functionallityButton: () => {})
+                        ],
+                      )
+                    ],
+                  ),
+                  topPageViewButtons(event),
                 ],
-              )),
-            ]),
-        Positioned(
-          bottom: 400.0,
-          left: (MediaQuery.of(context).size.width / 5),
-          // Adjust 50.0 based on the width of your widget
-          child:
-              topPageViewButtons(), // Replace YourWidget with your actual widget
-        ),
-      ]),
-      bottomNavigationBar:
-          isManagingSelected ? bottomScanButton() : bottomEditButton(event.id),
+              ),
+            ),
+            Expanded(
+                child: PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: _pageController,
+              onPageChanged: (int page) {
+                setState(() {
+                  _currentPage = page;
+                });
+              },
+              children: [
+                overviewPage(event),
+                managingPage(event),
+              ],
+            )),
+          ]),
+      bottomNavigationBar: isManagingSelected
+          ? bottomScanButton(event.remote_id)
+          : bottomEditButton(event.id),
     );
   }
 
   Widget bottomEditButton(int eventId) {
     return Container(
-      height: 60, // Set the height of the bottom navbar
+      height: 80, // Set the height of the bottom navbar
       decoration: BoxDecoration(
         // Set background color to white
         boxShadow: [
@@ -156,22 +193,60 @@ class _EventState extends State<Event> {
     );
   }
 
-  Widget bottomScanButton() {
+  Widget bottomScanButton(int eventID) {
     return Container(
       height: 80, // Set the height of the bottom navbar
       decoration: BoxDecoration(
-        // Set background color to white
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white, // Set shadow color to white
-            blurRadius: 15, // Adjust the blur radius
-            offset: Offset(0, -20), // Set shadow offset
+          // Set background color to white
+
           ),
-        ],
-      ),
       child: Center(
-        child:
-            flaotingButtonWidget(title: 'SCAN', buttonFunctionality: () => {}),
+        child: flaotingButtonWidget(
+            title: 'SCAN',
+            buttonFunctionality: () async {
+              await initializeCamera();
+              await scanBarcode();
+              if (scannedCode != 0) {
+                bool result = await Provider.of<UserBookedProvider>(context,
+                        listen: false)
+                    .userPresent(scannedCode, eventID);
+                if (result) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Center(
+                          child: Text(
+                        'user scanned successfully ',
+                        textAlign: TextAlign.center,
+                      )),
+                      backgroundColor: Color.fromARGB(255, 134, 253, 140),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Center(
+                          child: Text(
+                        'Invalid code',
+                        textAlign: TextAlign.center,
+                      )),
+                      backgroundColor: Color.fromARGB(255, 255, 88, 73),
+                    ),
+                  );
+                }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Center(
+                      child: Text(
+                        'Please Scan again',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    backgroundColor: Color.fromARGB(255, 255, 88, 73),
+                  ),
+                );
+              }
+            }),
       ),
     );
   }
@@ -192,8 +267,11 @@ class _EventState extends State<Event> {
     );
   }
 
-  Widget managingPage() {
-    return SingleChildScrollView(child: LikeTableWidget());
+  Widget managingPage(EventEntity event) {
+    return SingleChildScrollView(
+        child: LikeTableWidget(
+      eventId: event.remote_id,
+    ));
   }
 
   Widget overviewPage(EventEntity event) {
@@ -202,7 +280,7 @@ class _EventState extends State<Event> {
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(
             18,
-            40,
+            10,
             18,
             0,
           ),
@@ -249,29 +327,30 @@ class _EventState extends State<Event> {
     );
   }
 
-  Widget topPageViewButtons() {
+  Widget topPageViewButtons(EventEntity event) {
     return Container(
       decoration: BoxDecoration(
-        color: Color.fromARGB(220, 255, 255, 255),
+        color: Color.fromARGB(142, 255, 255, 255),
         borderRadius: BorderRadius.all(Radius.circular(30)),
       ),
       clipBehavior: Clip.hardEdge,
-      width: MediaQuery.of(context).size.width * 0.6,
+      width: MediaQuery.of(context).size.width * 0.8,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 9.0, sigmaY: 9.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: MediaQuery.of(context).size.width * 0.3,
+              width: MediaQuery.of(context).size.width * 0.4,
               height: 50,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30.0),
-                  bottomLeft: Radius.circular(30.0),
+                  topLeft: Radius.circular(20.0),
+                  bottomLeft: Radius.circular(20.0),
                 ),
-                color:
-                    isManagingSelected ? Colors.transparent : Color(0xFF662549),
+                color: isManagingSelected
+                    ? const Color.fromARGB(0, 255, 255, 255)
+                    : Color(0xFF662549),
               ),
               child: Center(
                 child: Material(
@@ -306,12 +385,12 @@ class _EventState extends State<Event> {
               ),
             ),
             Container(
-              width: MediaQuery.of(context).size.width * 0.3,
+              width: MediaQuery.of(context).size.width * 0.4,
               height: 50,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(30.0),
-                  bottomRight: Radius.circular(30.0),
+                  topRight: Radius.circular(20.0),
+                  bottomRight: Radius.circular(20.0),
                 ),
                 color:
                     isManagingSelected ? Color(0xFF662549) : Colors.transparent,
@@ -321,12 +400,14 @@ class _EventState extends State<Event> {
                 child: InkWell(
                   splashColor: Color(0xFFCE99A3),
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30.0),
-                    bottomLeft: Radius.circular(30.0),
+                    topLeft: Radius.circular(20.0),
+                    bottomLeft: Radius.circular(20.0),
                   ),
                   onTap: () {
                     setState(() {
                       isManagingSelected = true;
+                      Provider.of<UserBookedProvider>(context, listen: false)
+                          .getUsers(event.remote_id);
                       _pageController.animateToPage(1,
                           duration: Duration(milliseconds: 500),
                           curve: Curves.ease);

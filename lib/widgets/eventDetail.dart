@@ -8,7 +8,7 @@ Widget eventDetail({
 }) {
   Widget iconOrImage() {
     if (need == 'location') {
-      return Icon(
+      return const Icon(
         Ionicons.location,
         size: 22,
         color: Color.fromARGB(255, 102, 37, 73),
@@ -21,7 +21,7 @@ Widget eventDetail({
         fit: BoxFit.cover,
       );
     } else if (need == 'date') {
-      return Icon(
+      return const Icon(
         Ionicons.calendar,
         size: 22,
         color: Color.fromARGB(255, 102, 37, 73),
@@ -32,7 +32,7 @@ Widget eventDetail({
 
   return Container(
     height: 50,
-    margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+    margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -42,23 +42,23 @@ Widget eventDetail({
           height: 50,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            color: Color.fromARGB(255, 234, 220, 220),
+            color: const Color.fromARGB(255, 234, 220, 220),
           ),
           child: Center(child: iconOrImage()),
         ),
-        SizedBox(width: 10),
+        const SizedBox(width: 10),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Text(
               firstTitle,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
             Text(
               secondTitle,
               style:
-                  TextStyle(color: Color.fromARGB(95, 0, 0, 0), fontSize: 12),
+                  const TextStyle(color: Color.fromARGB(95, 0, 0, 0), fontSize: 12),
             ),
           ],
         )

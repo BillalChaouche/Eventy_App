@@ -6,7 +6,7 @@ import 'package:ionicons/ionicons.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Categories extends StatefulWidget {
-  static Map<String, IconData> _iconDataMapping = {
+  static final Map<String, IconData> _iconDataMapping = {
     'home': Icons.home,
     'musical_notes': Ionicons.musical_note,
     'football': Ionicons.football,
@@ -69,8 +69,8 @@ class _CategoriesState extends State<Categories> {
         controller: _refreshController,
         onRefresh: _onRefresh,
         onLoading: _onLoading,
-        header: ClassicHeader(
-          refreshingIcon: const SizedBox(
+        header: const ClassicHeader(
+          refreshingIcon: SizedBox(
             width: 25,
             height: 25,
             child: CircularProgressIndicator(
@@ -78,27 +78,27 @@ class _CategoriesState extends State<Categories> {
               valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF662549)),
             ),
           ),
-          idleIcon: const Icon(
+          idleIcon: Icon(
             Icons.refresh,
             color: Color(0xFF662549),
           ),
-          releaseIcon: const Icon(
+          releaseIcon: Icon(
             Icons.refresh,
             color: Color(0xFF662549),
           ),
-          completeIcon: const Icon(
+          completeIcon: Icon(
             Ionicons.checkmark_circle_outline,
             color: Color.fromARGB(255, 135, 244, 138),
           ),
-          failedIcon: const Icon(Icons.error,
-              color: const Color.fromARGB(255, 239, 92, 92)),
+          failedIcon: Icon(Icons.error,
+              color: Color.fromARGB(255, 239, 92, 92)),
           idleText: '',
           releaseText: '',
           refreshingText: '',
           completeText: '',
           failedText: 'Refresh failed',
           textStyle: TextStyle(
-              color: const Color.fromARGB(
+              color: Color.fromARGB(
                   255, 239, 92, 92)), // Change the text color here
         ),
         child: FutureBuilder<List<Map<String, dynamic>>>(
@@ -106,14 +106,14 @@ class _CategoriesState extends State<Categories> {
           builder:
               (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF662549)),
                   strokeWidth: 2,
                 ),
               );
             } else if (snapshot.hasError) {
-              return Center(child: Text('Error fetching data'));
+              return const Center(child: Text('Error fetching data'));
             } else {
               List<Map<String, dynamic>> categories = snapshot.data ?? [];
 

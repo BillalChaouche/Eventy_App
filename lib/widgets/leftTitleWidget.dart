@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 Widget leftTitleWidget(String title, double size) {
-  return Container(
+  return SizedBox(
     width: double.infinity,
     child: Text(
       title,

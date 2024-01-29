@@ -19,7 +19,7 @@ class PageAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.transparent,
       leading: backButton
           ? IconButton(
-              icon: Icon(Ionicons.chevron_back_outline),
+              icon: const Icon(Ionicons.chevron_back_outline),
               color: Colors.black,
               onPressed: () {
                 Navigator.of(context).pop();

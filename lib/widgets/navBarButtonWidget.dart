@@ -1,4 +1,3 @@
-import 'package:eventy/widgets/blurButton.dart';
 import 'package:flutter/material.dart';
 
 typedef FunctionallityButton = void Function(int id);
@@ -20,7 +19,7 @@ Widget navBarButtonWiget({
         Icon(icon,
             size: 30,
             color: id == selected
-                ? Color.fromARGB(255, 102, 37, 73)
+                ? const Color.fromARGB(255, 102, 37, 73)
                 : Colors.white),
         if (id == selected) const SizedBox(height: 4),
         if (id == selected)

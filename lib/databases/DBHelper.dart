@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:eventy/databases/DBeventOrg.dart';
-import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:eventy/databases/DBUserOrganizer.dart';
 import 'package:eventy/databases/DBcategory.dart';
@@ -17,7 +16,7 @@ class DBHelper {
     if (database != null) {
       return database;
     }
-    List sql_create_code = [
+    List sqlCreateCode = [
       DBUserOrganizer.sql_code,
       DBEvent.sql_code,
       DBCategory.sql_code,
@@ -26,7 +25,9 @@ class DBHelper {
     database = openDatabase(
       join(await getDatabasesPath(), _database_name),
       onCreate: (database, version) {
-        for (var sql_code in sql_create_code) database.execute(sql_code);
+        for (var sql_code in sqlCreateCode) {
+          database.execute(sql_code);
+        }
       },
       version: _database_version,
       onUpgrade: (database, oldVersion, newVersion) {
@@ -38,8 +39,9 @@ class DBHelper {
           database.execute('DROP TABLE IF EXISTS categories');
           database.execute('DROP TABLE IF EXISTS EventsOrg');
 
-
-          for (var sql_code in sql_create_code) database.execute(sql_code);
+          for (var sql_code in sqlCreateCode) {
+            database.execute(sql_code);
+          }
         }
       },
     );
@@ -57,16 +59,17 @@ class DBHelper {
     print("drop table events");
     await db.execute('DROP TABLE IF EXISTS categories');
     print("drop table categories");
-    await db.execute('DROP TABLE IF EXISTS EventsOrg');
+    //await db.execute('DROP TABLE IF EXISTS categories');
     print("drop table EventsOrg");
 
-
     // Recreate the tables
-    List<String> sql_create_code = [
+    List<String> sqlCreateCode = [
       DBUserOrganizer.sql_code,
       DBEvent.sql_code,
       DBCategory.sql_code,
     ];
-    for (var sql_code in sql_create_code) await db.execute(sql_code);
+    for (var sql_code in sqlCreateCode) {
+      await db.execute(sql_code);
+    }
   }
 }

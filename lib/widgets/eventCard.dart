@@ -1,4 +1,3 @@
-import 'package:eventy/Static/AppConfig.dart';
 import 'package:eventy/models/EventEntity.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -10,7 +9,7 @@ Widget eventCard({
   required ButtonFunctionality buttonFunctionality,
 }) {
   return Container(
-      margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
       width: double.infinity,
       height: 100,
       decoration: BoxDecoration(
@@ -35,7 +34,7 @@ Widget eventCard({
               bottomLeft: Radius.circular(15), // Radius for bottom-left corner
             ),
             child: Image.network(
-              AppConfig.backendBaseUrlImg + event.imgPath,
+              event.imgPath,
               width: 100,
               height: 100,
               fit: BoxFit.cover,

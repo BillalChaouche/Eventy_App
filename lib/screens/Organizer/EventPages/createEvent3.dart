@@ -5,10 +5,18 @@ import 'package:eventy/widgets/toggleWidget.dart';
 import 'package:eventy/widgets/personalizedButtonWidget.dart';
 import 'package:eventy/widgets/appBar.dart';
 
-class CreateEvent3 extends StatelessWidget {
+class CreateEvent3 extends StatefulWidget {
   final Map<String, dynamic> createdEvent;
 
   const CreateEvent3({Key? key, required this.createdEvent}) : super(key: key);
+
+  @override
+  _CreateEvent3State createState() => _CreateEvent3State();
+}
+
+class _CreateEvent3State extends State<CreateEvent3> {
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     bool acceptDirectly = false;
@@ -16,7 +24,7 @@ class CreateEvent3 extends StatelessWidget {
     return Scaffold(
       appBar: const PageAppBar(title: "Create Event"),
       body: Center(
-        child: Container(
+        child: SizedBox(
           height: MediaQuery.of(context).size.height,
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
@@ -56,43 +64,55 @@ class CreateEvent3 extends StatelessWidget {
             Expanded(
               child: Container(),
             ),
-            PersonalizedButtonWidget(
-              context: context,
-              buttonText: "Finish",
-              onClickListener: () async {
-                print("GOING TO INSERT EVENT IN LOCAL");
+            isLoading
+                ? const CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF662549)),
+                    strokeWidth: 2,
+                  )
+                : PersonalizedButtonWidget(
+                    context: context,
+                    buttonText: "Finish",
+                    onClickListener: () async {
+                      setState(() {
+                        isLoading = true;
+                      });
+                      print("GOING TO INSERT EVENT IN LOCAL");
 
-                // Insert the event into the EventsOrg table
-                await DBEventOrg.insertRecord({
-                  'title': createdEvent['eventName'],
-                  'imagePath': createdEvent[
-                      'imagePath'], // Add the imagePath if available
-                  'start_date': createdEvent['startDate'],
-                  'start_time': createdEvent['startTime'],
-                  'end_date': createdEvent['endDate'],
-                  'end_time': createdEvent['endTime'],
-                  'description': createdEvent['eventDescription'],
-                  'location': createdEvent['location'],
-                  'category': createdEvent['eventType'],
-                  'attendees': createdEvent['availablePlaces'],
-                  'flag': 1,
-                  'create_date': DateTime.now().toString(),
-                  'accept_directly': acceptDirectly,
-                  'delete_after_deadline': deleteAfterDeadline
-                });
+                      // Insert the event into the EventsOrg table
+                      await DBEventOrg.insertRecord({
+                        'title': widget.createdEvent['eventName'],
+                        'imagePath': widget.createdEvent[
+                            'imagePath'], // Add the imagePath if available
+                        'start_date': widget.createdEvent['startDate'],
+                        'start_time': widget.createdEvent['startTime'],
+                        'end_date': widget.createdEvent['endDate'],
+                        'end_time': widget.createdEvent['endTime'],
+                        'description': widget.createdEvent['eventDescription'],
+                        'location': widget.createdEvent['location'],
+                        'category': widget.createdEvent['eventType'],
+                        'attendees': widget.createdEvent['availablePlaces'],
+                        'flag': 1,
+                        'create_date': DateTime.now().toString(),
+                        'accept_directly': acceptDirectly,
+                        'delete_after_deadline': deleteAfterDeadline
+                      });
 
-                print("Event inserted SUCCESSFULLY IN LOCAL DB");
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('New event inserted successfully'),
+                      print("Event inserted SUCCESSFULLY IN LOCAL DB");
+                      setState(() {
+                        isLoading = true;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('New event inserted successfully'),
+                        ),
+                      );
+
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
                   ),
-                );
-
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-            ),
             const SizedBox(
               height: 20,
             )

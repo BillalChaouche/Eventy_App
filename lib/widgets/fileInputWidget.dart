@@ -1,14 +1,14 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:eventy/Static/AppConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
 class FileInputWidget extends StatefulWidget {
   final String? DEF_IMG_PATH;
+  final Function(String?)? onImageSelected;
 
-  FileInputWidget({this.DEF_IMG_PATH});
+  const FileInputWidget({super.key, this.DEF_IMG_PATH, this.onImageSelected});
 
   @override
   _FileInputWidgetState createState() => _FileInputWidgetState();
@@ -26,6 +26,10 @@ class _FileInputWidgetState extends State<FileInputWidget> {
         fileName = result.files.single.name;
         userUploadedImagePath = result.files.single.path;
       });
+      // Pass the selected image path to the parent widget using the callback
+      if (widget.onImageSelected != null) {
+        widget.onImageSelected!(userUploadedImagePath);
+      }
     }
   }
 
@@ -38,7 +42,7 @@ class _FileInputWidgetState extends State<FileInputWidget> {
         width: MediaQuery.of(context).size.width * 0.7,
         decoration: BoxDecoration(
           border: Border.all(
-            color: Color(0xFFBDBDBD),
+            color: const Color(0xFFBDBDBD),
           ),
           borderRadius: BorderRadius.circular(8.0),
           image: userUploadedImagePath != null
@@ -48,8 +52,7 @@ class _FileInputWidgetState extends State<FileInputWidget> {
                 )
               : widget.DEF_IMG_PATH != null
                   ? DecorationImage(
-                      image: CachedNetworkImageProvider(
-                          AppConfig.backendBaseUrlImg + widget.DEF_IMG_PATH!),
+                      image: CachedNetworkImageProvider(widget.DEF_IMG_PATH!),
                       fit: BoxFit.cover,
                     )
                   : null,
@@ -72,16 +75,16 @@ class _FileInputWidgetState extends State<FileInputWidget> {
                   color: userUploadedImagePath != null ||
                           widget.DEF_IMG_PATH != null
                       ? Colors.white
-                      : Color(0xFFBDBDBD),
+                      : const Color(0xFFBDBDBD),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   fileName.isEmpty ? 'Choose file' : fileName,
                   style: TextStyle(
                     color: userUploadedImagePath != null ||
                             widget.DEF_IMG_PATH != null
                         ? Colors.white
-                        : Color(0xFFBDBDBD),
+                        : const Color(0xFFBDBDBD),
                   ),
                 ),
               ],

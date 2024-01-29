@@ -24,7 +24,7 @@ class DBEvent {
               accepted INTEGER,
               saved INTEGER,
               scanned INTEGER,
-              code INTEGER,
+              code TEXT,
               flag INTEGER,
               create_date TEXT
              
@@ -52,7 +52,7 @@ class DBEvent {
             scanned,
             code,
             flag
-          from ${tableName}
+          from $tableName
           order by title ASC
           ''');
   }
@@ -81,7 +81,7 @@ class DBEvent {
             scanned,
             code,
             flag
-          from ${tableName}
+          from $tableName
           Where LOWER(title) like '%${keyword.toLowerCase()}%' 
           order by title ASC
           ''');
@@ -89,8 +89,9 @@ class DBEvent {
 
   static Future<List<Map<String, dynamic>>> getAllEventsByCategory(
       String category) async {
-    if (category.isEmpty || category.trim() == '' || category == 'My feed')
+    if (category.isEmpty || category.trim() == '' || category == 'My feed') {
       return getAllEvents();
+    }
 
     final database = await DBHelper.getDatabase();
 
@@ -112,7 +113,7 @@ class DBEvent {
             scanned,
             code,
             flag
-          from ${tableName}
+          from $tableName
           Where LOWER(category) like '%${category.toLowerCase()}%' 
           order by title ASC
           ''');
@@ -139,14 +140,14 @@ class DBEvent {
         return await database.rawQuery(
             "SELECT * FROM events WHERE date = '$formattedDate' AND location = '$location'");
       case 'Tomorrow':
-        DateTime tomorrow = now.add(Duration(days: 1));
+        DateTime tomorrow = now.add(const Duration(days: 1));
         formattedDate =
             '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
         return await database.rawQuery(
             "SELECT * FROM events WHERE date = '$formattedDate' AND location = '$location'");
       case 'This Week':
         DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-        DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
+        DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
         String startDate =
             '${startOfWeek.year}-${startOfWeek.month.toString().padLeft(2, '0')}-${startOfWeek.day.toString().padLeft(2, '0')}';
         String endDate =
@@ -170,7 +171,7 @@ class DBEvent {
 
     List<Map> res = await database.rawQuery('''SELECT 
             count(id) as cc
-          from ${tableName}
+          from $tableName
           ''');
     return res[0]['cc'] ?? 0;
   }
@@ -183,46 +184,45 @@ class DBEvent {
             remote_id, 
             saved,
             booked
-          from ${tableName}
+          from $tableName
           where flag=1
           ''');
   }
 
   static Future<bool> uploadModification() async {
     List modifiedData = await getEventsTomodify();
-    int event_id = 0;
+    int eventId = 0;
     int saved = 0;
     int booked = 0;
     List<Map<String, dynamic>> user = await DBUserOrganizer.getUser();
     String userEmail = user[0]['email'];
     for (Map item in modifiedData) {
-      event_id = item['remote_id'];
+      eventId = item['remote_id'];
       saved = item['saved'];
       booked = item['booked'];
 
-      await endpoint_api_get(AppConfig.backendBaseUrl +
-          'operations_user_event.php?action=events.update&user_email=${userEmail}&event_id=${event_id}&saved=${saved}&booked=${booked}');
+      await endpoint_api_get('${AppConfig.backendBaseUrl}operations_user_event.php?action=events.update&user_email=$userEmail&event_id=$eventId&saved=$saved&booked=$booked');
       await updateFlag(item['id'], 0);
     }
     return true;
   }
 
-  static Future<bool> syncEvents(List<Map<String, dynamic>> remote_data) async {
-    List local_data = await getAllEvents();
-    Map index_remote = {};
-    List local_ids = [];
-    for (Map item in local_data) {
-      index_remote[item['remote_id']] = item['id'];
-      local_ids.add(item['id']);
+  static Future<bool> syncEvents(List<Map<String, dynamic>> remoteData) async {
+    List localData = await getAllEvents();
+    Map indexRemote = {};
+    List localIds = [];
+    for (Map item in localData) {
+      indexRemote[item['remote_id']] = item['id'];
+      localIds.add(item['id']);
     }
 
-    for (Map item in remote_data) {
-      if (index_remote.containsKey(item['id'])) {
-        int local_id = index_remote[item['id']];
+    for (Map item in remoteData) {
+      if (indexRemote.containsKey(item['id'])) {
+        int localId = indexRemote[item['id']];
         int booked = item['booked'] ?? 0;
         int saved = item['saved'] ?? 0;
         int accepted = item['accepted'] ?? 0;
-        await updateRecord(local_id, {
+        await updateRecord(localId, {
           'title': item['title'],
           'remote_id': item['id'],
           'imagePath': item['imagePath'],
@@ -241,7 +241,7 @@ class DBEvent {
           'flag': 0
         });
 
-        local_ids.remove(local_id);
+        localIds.remove(localId);
       } else {
         int booked = item['booked'] ?? 0;
         int saved = item['saved'] ?? 0;
@@ -266,26 +266,26 @@ class DBEvent {
         });
       }
     }
-    for (int local_id in local_ids) await deleteRecord(local_id);
+    for (int local_id in localIds) {
+      await deleteRecord(local_id);
+    }
     return true;
   }
 
   static Future<bool> service_sync_events() async {
     print("Running Cron Service to get Events");
     List<Map<String, dynamic>> user = await DBUserOrganizer.getUser();
-    if(user.length != 0){
+    if (user.isNotEmpty) {
       String userEmail = user[0]['email'];
-    List? remote_data = await endpoint_api_get(AppConfig.backendBaseUrl +
-        "operations_user_event.php?action=events.get&email=${userEmail}");
+      List? remoteData = await endpoint_api_get("${AppConfig.backendBaseUrl}operations_user_event.php?action=events.get&email=$userEmail");
 
-    if (remote_data != null) {
-      print(remote_data);
-      await DBEvent.syncEvents(remote_data as List<Map<String, dynamic>>);
-      return true;
+      if (remoteData != null) {
+        print(remoteData);
+        await DBEvent.syncEvents(remoteData as List<Map<String, dynamic>>);
+        return true;
+      }
     }
 
-    }
-    
     return false;
   }
 
@@ -304,7 +304,7 @@ class DBEvent {
 
   static Future<bool> deleteRecord(int id) async {
     final database = await DBHelper.getDatabase();
-    database.rawQuery("""delete from  ${tableName}  where id=?""", [id]);
+    database.rawQuery("""delete from  $tableName  where id=?""", [id]);
     return true;
   }
 

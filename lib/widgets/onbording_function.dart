@@ -1,5 +1,4 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:eventy/screens/Common/IntroPages/OnBording1.dart';
 import 'package:eventy/screens/Common/IntroPages/OnBording2.dart';
 import 'package:eventy/screens/Common/IntroPages/OnBording3.dart';
 import 'package:eventy/screens/Common/RegistrationPages/login.dart';
@@ -23,27 +22,27 @@ class OnBording extends StatefulWidget {
 class _OnBordingState extends State<OnBording> {
   Widget NextWidget(int num) {
     if (num == 1) {
-      return OnBording2();
+      return const OnBording2();
     } else {
       if (num == 2) {
-        return OnBording3();
+        return const OnBording3();
       }
     }
-    return Login();
+    return const Login();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFFFFF),
-      body: Container(
+      body: SizedBox(
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             FadeInUp(
-                duration: Duration(milliseconds: 1500),
+                duration: const Duration(milliseconds: 1500),
                 child: Image(
                   image: AssetImage(widget.Image_Path),
                   width: 250,
@@ -63,41 +62,41 @@ class _OnBordingState extends State<OnBording> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                       color: const Color(0x00662549).withOpacity(1),
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(60),
                         topRight: Radius.circular(60),
                       ),
                       boxShadow: [
                         BoxShadow(
                           blurRadius: 10,
-                          color: Color(0x00662549).withOpacity(0.3),
-                          offset: Offset(0, -5),
+                          color: const Color(0x00662549).withOpacity(0.3),
+                          offset: const Offset(0, -5),
                         )
                       ]),
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         FadeInUp(
-                          duration: Duration(milliseconds: 1000),
-                          delay: Duration(milliseconds: 1000),
+                          duration: const Duration(milliseconds: 1000),
+                          delay: const Duration(milliseconds: 1000),
                           from: 50,
                           child: Text(
                             widget.title,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
                           ),
                         ),
-                        SizedBox(height: 30),
+                        const SizedBox(height: 30),
                         Center(
                           child: FadeInUp(
-                            duration: Duration(milliseconds: 1000),
-                            delay: Duration(milliseconds: 1000),
+                            duration: const Duration(milliseconds: 1000),
+                            delay: const Duration(milliseconds: 1000),
                             from: 60,
-                            child: Text(
+                            child: const Text(
                               'Where Every Moment Finds Its Place',
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -107,13 +106,13 @@ class _OnBordingState extends State<OnBording> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 30),
+                        const SizedBox(height: 30),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             FadeInUp(
-                              duration: Duration(milliseconds: 1000),
-                              delay: Duration(milliseconds: 1000),
+                              duration: const Duration(milliseconds: 1000),
+                              delay: const Duration(milliseconds: 1000),
                               from: 70,
                               child: Align(
                                 alignment: Alignment.bottomLeft,
@@ -132,8 +131,8 @@ class _OnBordingState extends State<OnBording> {
                               ),
                             ),
                             FadeInUp(
-                              duration: Duration(milliseconds: 1000),
-                              delay: Duration(milliseconds: 1000),
+                              duration: const Duration(milliseconds: 1000),
+                              delay: const Duration(milliseconds: 1000),
                               from: 70,
                               child: Align(
                                 alignment: Alignment.bottomRight,
@@ -147,7 +146,7 @@ class _OnBordingState extends State<OnBording> {
                                       ),
                                     );
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     'NEXT',
                                     style: TextStyle(
                                       fontSize: 12,

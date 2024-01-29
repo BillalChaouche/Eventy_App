@@ -1,11 +1,9 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:eventy/Providers/EventProvider.dart';
-import 'package:eventy/Static/AppConfig.dart';
 import 'package:eventy/models/EventEntity.dart';
 import 'package:eventy/widgets/blurButton.dart';
 import 'package:eventy/widgets/floatingButtonWidget.dart';
-import 'package:eventy/widgets/profileWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
@@ -48,7 +46,7 @@ class _AcceptedEventState extends State<AcceptedEvent> {
                 decoration: BoxDecoration(
                   // Optional: Add border radius
                   image: DecorationImage(
-                    image: NetworkImage(AppConfig.backendBaseUrlImg +
+                    image: NetworkImage(
                         event.imgPath), // Replace with your image path
                     fit: BoxFit.cover,
                   ),
@@ -170,17 +168,17 @@ class _AcceptedEventState extends State<AcceptedEvent> {
                                         padding: const EdgeInsets.all(8.0),
                                         child: Center(
                                           child: PrettyQrView.data(
-                                            data: '214 212 331',
+                                            data: event.code,
                                             decoration:
                                                 const PrettyQrDecoration(
                                               shape: PrettyQrSmoothSymbol(
                                                 color: Color.fromARGB(
                                                     255, 174, 68, 94),
                                               ),
-                                              image: PrettyQrDecorationImage(
+                                              /*image: PrettyQrDecorationImage(
                                                 image: AssetImage(
                                                     'assets/images/logo.png'),
-                                              ),
+                                              ),*/
                                             ),
                                           ),
                                         ),
@@ -297,18 +295,18 @@ class _AcceptedEventState extends State<AcceptedEvent> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    profileWidget(
+                                    /*profileWidget(
                                         50,
                                         50,
                                         "assets/images/profile.jpg",
                                         false,
-                                        () => {}),
+                                        () => {}),*/
                                     const SizedBox(
                                       width: 12,
                                     ),
-                                    const Text(
-                                      'Adam Ali -- 214 212 331',
-                                      style: TextStyle(
+                                    Text(
+                                      '-- ${event.code} --',
+                                      style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 15),
                                     ),

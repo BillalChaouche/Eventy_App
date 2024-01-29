@@ -68,7 +68,7 @@ class _EventsState extends State<Events> {
   }
 
   void _startLoading() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
           _isLoadingE = !_isLoadingE;
@@ -95,8 +95,8 @@ class _EventsState extends State<Events> {
             controller: _refreshController,
             onRefresh: _onRefresh,
             onLoading: _onLoading,
-            header: ClassicHeader(
-              refreshingIcon: const SizedBox(
+            header: const ClassicHeader(
+              refreshingIcon: SizedBox(
                 width: 25,
                 height: 25,
                 child: CircularProgressIndicator(
@@ -104,27 +104,27 @@ class _EventsState extends State<Events> {
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF662549)),
                 ),
               ),
-              idleIcon: const Icon(
+              idleIcon: Icon(
                 Icons.refresh,
                 color: Color(0xFF662549),
               ),
-              releaseIcon: const Icon(
+              releaseIcon: Icon(
                 Icons.refresh,
                 color: Color(0xFF662549),
               ),
-              completeIcon: const Icon(
+              completeIcon: Icon(
                 Ionicons.checkmark_circle_outline,
                 color: Color.fromARGB(255, 135, 244, 138),
               ),
-              failedIcon: const Icon(Icons.error,
-                  color: const Color.fromARGB(255, 239, 92, 92)),
+              failedIcon: Icon(Icons.error,
+                  color: Color.fromARGB(255, 239, 92, 92)),
               idleText: '',
               releaseText: '',
               refreshingText: '',
               completeText: '',
               failedText: 'Refresh failed',
               textStyle: TextStyle(
-                  color: const Color.fromARGB(
+                  color: Color.fromARGB(
                       255, 239, 92, 92)), // Change the text color here
             ),
             child: SingleChildScrollView(
@@ -140,16 +140,16 @@ class _EventsState extends State<Events> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(120),
                         boxShadow: [
                           BoxShadow(
-                            color: Color.fromARGB(79, 199, 199, 199)
+                            color: const Color.fromARGB(79, 199, 199, 199)
                                 .withOpacity(0.3),
                             spreadRadius: 3,
                             blurRadius: 10,
-                            offset: Offset(0, 3),
+                            offset: const Offset(0, 3),
                           ),
                         ],
                         color: Colors.white,
@@ -170,9 +170,9 @@ class _EventsState extends State<Events> {
                               elevation: 0,
                               splashFactory: NoSplash.splashFactory,
                               backgroundColor: (choice == "Booked")
-                                  ? Color.fromARGB(255, 102, 37, 73)
-                                  : Color.fromARGB(255, 255, 255, 255),
-                              padding: EdgeInsets.symmetric(
+                                  ? const Color.fromARGB(255, 102, 37, 73)
+                                  : const Color.fromARGB(255, 255, 255, 255),
+                              padding: const EdgeInsets.symmetric(
                                 vertical: 18,
                               ),
                               shape: RoundedRectangleBorder(
@@ -184,8 +184,8 @@ class _EventsState extends State<Events> {
                               'Booked',
                               style: TextStyle(
                                 color: (choice == "Booked")
-                                    ? Color.fromARGB(255, 255, 255, 255)
-                                    : Color.fromARGB(255, 102, 37, 73),
+                                    ? const Color.fromARGB(255, 255, 255, 255)
+                                    : const Color.fromARGB(255, 102, 37, 73),
                               ),
                             ),
                           )),
@@ -201,9 +201,9 @@ class _EventsState extends State<Events> {
                               elevation: 0,
                               splashFactory: NoSplash.splashFactory,
                               backgroundColor: (choice == "Accepted")
-                                  ? Color.fromARGB(255, 102, 37, 73)
-                                  : Color.fromARGB(255, 255, 255, 255),
-                              padding: EdgeInsets.symmetric(
+                                  ? const Color.fromARGB(255, 102, 37, 73)
+                                  : const Color.fromARGB(255, 255, 255, 255),
+                              padding: const EdgeInsets.symmetric(
                                 vertical: 18,
                               ),
                               shape: RoundedRectangleBorder(
@@ -215,8 +215,8 @@ class _EventsState extends State<Events> {
                               'Accepted',
                               style: TextStyle(
                                 color: (choice == "Accepted")
-                                    ? Color.fromARGB(255, 255, 255, 255)
-                                    : Color.fromARGB(255, 102, 37, 73),
+                                    ? const Color.fromARGB(255, 255, 255, 255)
+                                    : const Color.fromARGB(255, 102, 37, 73),
                               ),
                             ),
                           )),
@@ -232,9 +232,9 @@ class _EventsState extends State<Events> {
                               elevation: 0,
                               splashFactory: NoSplash.splashFactory,
                               backgroundColor: (choice == "Saved")
-                                  ? Color.fromARGB(255, 102, 37, 73)
-                                  : Color.fromARGB(255, 255, 255, 255),
-                              padding: EdgeInsets.symmetric(
+                                  ? const Color.fromARGB(255, 102, 37, 73)
+                                  : const Color.fromARGB(255, 255, 255, 255),
+                              padding: const EdgeInsets.symmetric(
                                 vertical: 18,
                               ), // Padding here
                               shape: RoundedRectangleBorder(
@@ -246,15 +246,15 @@ class _EventsState extends State<Events> {
                               'Saved',
                               style: TextStyle(
                                 color: (choice == "Saved")
-                                    ? Color.fromARGB(255, 255, 255, 255)
-                                    : Color.fromARGB(255, 102, 37, 73),
+                                    ? const Color.fromARGB(255, 255, 255, 255)
+                                    : const Color.fromARGB(255, 102, 37, 73),
                               ),
                             ),
                           )),
                         ],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 12,
                     ),
                     Consumer<EventProvider>(
@@ -271,7 +271,7 @@ class _EventsState extends State<Events> {
                         ); // Show a loader if events are being fetched
                       } else if (eventProvider.events.isEmpty &&
                           eventProvider.noData) {
-                        return Container(
+                        return const SizedBox(
                             width: double.infinity,
                             height: 300,
                             child: Center(
@@ -314,7 +314,7 @@ class _EventsState extends State<Events> {
                             }
                             // If none of the conditions are met, return a placeholder widget or null
                             // return Placeholder(); // Example placeholder widget
-                            return SizedBox(); // Return an empty SizedBox as a placeholder
+                            return const SizedBox(); // Return an empty SizedBox as a placeholder
                           },
                         );
                       }
@@ -343,10 +343,10 @@ class _EventsState extends State<Events> {
 
   Widget eventCardShadow() {
     return AnimatedContainer(
-      margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 20),
       width: double.infinity,
       height: 100,
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15.0),
         gradient: LinearGradient(

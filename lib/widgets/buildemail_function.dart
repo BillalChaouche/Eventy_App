@@ -6,8 +6,8 @@ Widget buildemailwidget(TextEditingController controller) {
     child: TextFormField(
       controller: controller,
       decoration: InputDecoration(
-        prefixIcon: Icon(Icons.email),
-        label: Text('Email'),
+        prefixIcon: const Icon(Icons.email),
+        label: const Text('Email'),
         hintText: 'Enter Email',
         hintStyle: const TextStyle(
           color: Colors.black26,

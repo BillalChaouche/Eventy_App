@@ -1,4 +1,4 @@
-import 'package:eventy/widgets/blurButton.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 typedef FunctionallityButton = void Function();
@@ -19,7 +19,7 @@ Widget profileWidget(double width, double height, String imageSrc, bool shadow,
                 .withOpacity(0.5), // Shadow color
             spreadRadius: 2, // Spread radius
             blurRadius: 10, // Blur radius
-            offset: Offset(2, 2), // Shadow position
+            offset: const Offset(2, 2), // Shadow position
           ),
       ],
     ),
@@ -31,7 +31,7 @@ Widget profileWidget(double width, double height, String imageSrc, bool shadow,
             functionallityButton();
           },
           child: Ink.image(
-            image: AssetImage(imageSrc), // Your image path
+            image: CachedNetworkImageProvider(imageSrc), // Your image path
             fit: BoxFit.cover, // Image fit inside the button
           ),
         ),
